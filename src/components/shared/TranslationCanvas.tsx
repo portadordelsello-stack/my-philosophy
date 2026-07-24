@@ -162,13 +162,13 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           'The software changed. Habits didn\'t',
         ];
 
-        ctx.font = '300 22px "Inter", sans-serif';
+        ctx.font = '300 19px "Inter", sans-serif';
         ctx.fillStyle = activeColors.textMuted;
         ctx.textAlign = 'center';
 
         quotes.forEach((q, idx) => {
           const drift = Math.sin(time + idx) * 8;
-          ctx.fillText(q, 0, -65 + idx * 65 + drift);
+          ctx.fillText(q, 0, -55 + idx * 55 + drift);
         });
 
         // Particles gather around text areas
@@ -176,7 +176,7 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           const qIdx = i % 3;
           const angle = i * 2.4;
           const tx = Math.cos(angle) * 180 + (Math.sin(time + i) * 12);
-          const ty = -65 + qIdx * 65 + (Math.cos(time + i) * 6);
+          const ty = -55 + qIdx * 55 + (Math.cos(time + i) * 6);
           p.x += (tx - p.x) * ease;
           p.y += (ty - p.y) * ease;
           p.opacity += (0.16 - p.opacity) * ease;
