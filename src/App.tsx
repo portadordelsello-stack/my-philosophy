@@ -1,9 +1,8 @@
-// App.tsx — Root: Lenis + Language + Theme + Controls + Home
+// App.tsx — Root: Lenis + Language + Theme + Home
 import { useLenis }         from './hooks/useLenis';
 import { Home }             from './pages/Home';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider }    from './contexts/ThemeContext';
-import { Controls }         from './components/shared/Controls';
 
 export default function App() {
   useLenis();
@@ -11,8 +10,6 @@ export default function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        {/* Fixed controls: theme toggle + language toggle */}
-        <Controls />
         <Home />
       </LanguageProvider>
     </ThemeProvider>

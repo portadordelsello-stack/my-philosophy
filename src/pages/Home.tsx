@@ -1,104 +1,69 @@
 // Home.tsx
-// Narrative layer that orchestrates the single continuous universe of the landing page.
-// Sets up vertical ScrollTriggers for all 14 scenes to update background GlobalCanvas coordinates.
-import { useEffect, useState } from 'react';
+// Home composition layer for V3.0 "THE BECOMING" interactive film.
+// Establishes a single 950vh scroll height track, maps scroll progress to 0% -> 100%,
+// hides the hardware cursor during the film, and mounts FilmCanvas, NarrativeOverlay, and Controls.
+import { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import { GlobalCanvas } from '../components/shared/GlobalCanvas';
-import { Hero }         from '../components/scenes/Hero';
-import { Listening }    from '../components/scenes/Listening';
-import { Thoughts }     from '../components/scenes/Thoughts';
-import { Priority }     from '../components/scenes/Priority';
-import { Workflow }     from '../components/scenes/Workflow';
-import { People }       from '../components/scenes/People';
-import { Product }      from '../components/scenes/Product';
-import { Code }         from '../components/scenes/Code';
-import { Technology }   from '../components/scenes/Technology';
-import { FlowAlive }    from '../components/scenes/FlowAlive';
-import { Feedback }     from '../components/scenes/Feedback';
-import { Comparison }   from '../components/scenes/Comparison';
-import { Philosophy }   from '../components/scenes/Philosophy';
-import { Final }        from '../components/scenes/Final';
+import { FilmCanvas }       from '../components/shared/FilmCanvas';
+import { NarrativeOverlay } from '../components/shared/NarrativeOverlay';
+import { Controls }         from '../components/shared/Controls';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const SCENES = [
-  'hero',
-  'listening',
-  'thoughts',
-  'priority',
-  'workflow',
-  'people',
-  'product',
-  'code',
-  'technology',
-  'flow-alive',
-  'feedback',
-  'comparison',
-  'philosophy',
-  'final',
-];
-
 export function Home() {
-  const [activeScene, setActiveScene] = useState(0);
-  const [sceneProgress, setSceneProgress] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const scrollTrackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const triggers: ScrollTrigger[] = [];
+    const track = scrollTrackRef.current;
+    if (!track) return;
 
-    SCENES.forEach((id, index) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-
-      const trigger = ScrollTrigger.create({
-        trigger: el,
-        start: index === 0 ? 'top top' : 'top center',
-        end: index === SCENES.length - 1 ? 'bottom bottom' : 'bottom center',
-        scrub: true,
-        onToggle: (self) => {
-          if (self.isActive) {
-            setActiveScene(index);
-          }
-        },
-        onUpdate: (self) => {
-          if (self.isActive) {
-            setSceneProgress(self.progress);
-          }
-        },
-      });
-
-      triggers.push(trigger);
+    const trigger = ScrollTrigger.create({
+      trigger: track,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: true,
+      onUpdate: (self) => {
+        setProgress(self.progress);
+      },
     });
 
-    // Refresh ScrollTrigger to calculate correct layout offsets
-    ScrollTrigger.refresh();
-
     return () => {
-      triggers.forEach((t) => t.kill());
+      trigger.kill();
     };
   }, []);
 
-  return (
-    <main aria-label="Philosophy — Software starts with people" style={{ position: 'relative' }}>
-      {/* Persistent Background Visual Universe */}
-      <GlobalCanvas activeScene={activeScene} sceneProgress={sceneProgress} />
+  // Hide hardware cursor during film to enforce cinematic immersion
+  const showCursor = progress >= 0.96;
 
-      {/* Narrative steps in foreground */}
-      <Hero />
-      <Listening />
-      <Thoughts />
-      <Priority />
-      <Workflow />
-      <People />
-      <Product />
-      <Code />
-      <Technology />
-      <FlowAlive />
-      <Feedback />
-      <Comparison />
-      <Philosophy />
-      <Final />
-    </main>
+  return (
+    <div
+      ref={scrollTrackRef}
+      style={{
+        position: 'relative',
+        height: '950vh', // long scroll track for smooth scrollytelling pacing
+        background: 'transparent',
+        cursor: showCursor ? 'auto' : 'none', // hide cursor until CTA
+      }}
+    >
+      {/* Viewport locked cinematic window */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          width: '100%',
+          height: '100dvh',
+          overflow: 'hidden',
+          pointerEvents: 'none',
+        }}
+      >
+        <FilmCanvas progress={progress} />
+        <NarrativeOverlay progress={progress} />
+        {/* Mount controls inside the fixed viewport */}
+        <Controls progress={progress} />
+      </div>
+    </div>
   );
 }
