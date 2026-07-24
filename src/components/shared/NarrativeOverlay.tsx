@@ -120,31 +120,30 @@ export function NarrativeOverlay({ progress, onCtaHoverChange }: NarrativeOverla
               gap: '1.5rem',
             }}
           >
-            {/* The gray phrase fades in, then fades out slowly */}
+            {/* The gray phrase fades in, stays readable for 5s, then fades out slowly */}
             <motion.p
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: [0, 0.45, 0.45, 0] }}
-              transition={{ times: [0, 0.15, 0.75, 1], duration: 5.5, ease: 'easeInOut' }}
+              animate={{ opacity: [0, 0.6, 0.6, 0] }}
+              transition={{ times: [0, 0.15, 0.75, 1], duration: 6.5, ease: 'easeInOut' }}
               style={{
                 fontFamily: 'var(--font-sans)',
                 fontWeight: 300,
-                fontSize: 'clamp(1.2rem, 3.2vw, 1.8rem)',
+                fontSize: 'clamp(1.3rem, 3.5vw, 2.0rem)',
                 letterSpacing: '-0.02em',
                 color: c.textSecondary,
                 lineHeight: 1.35,
-                maxWidth: '600px',
+                maxWidth: '620px',
                 position: 'absolute',
-                top: '38%',
               }}
             >
               {ctaTitle}
             </motion.p>
             
-            {/* The main subtitle fades in and remains visible */}
+            {/* The main subtitle fades in AFTER the gray title has completely vanished */}
             <motion.p
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.5, duration: 2.0, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: 6.8, duration: 2.0, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 fontFamily: 'var(--font-sans)',
                 fontWeight: 300,
@@ -165,7 +164,7 @@ export function NarrativeOverlay({ progress, onCtaHoverChange }: NarrativeOverla
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 5.5, duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: 9.8, duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
               onMouseEnter={() => onCtaHoverChange?.(true)}
               onMouseLeave={() => onCtaHoverChange?.(false)}
               style={{
