@@ -157,16 +157,16 @@ export function NarrativeOverlay({ progress, onCtaHoverChange }: NarrativeOverla
               {ctaSub}
             </motion.p>
 
-            {/* The borderless, pill-less button fades in after silence */}
-            <motion.button
-              onClick={() => {
-                window.location.href = 'mailto:juanpacheco@playcode.com.ar';
-              }}
+            {/* The borderless, pill-less native mailto link fades in after silence */}
+            <motion.a
+              href="mailto:juanpacheco@playcode.com.ar"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 9.8, duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
               onMouseEnter={() => onCtaHoverChange?.(true)}
               onMouseLeave={() => onCtaHoverChange?.(false)}
+              onTouchStart={() => onCtaHoverChange?.(true)}
+              onTouchEnd={() => onCtaHoverChange?.(false)}
               style={{
                 background: 'none',
                 border: 'none',
@@ -179,12 +179,14 @@ export function NarrativeOverlay({ progress, onCtaHoverChange }: NarrativeOverla
                 cursor: 'pointer',
                 outline: 'none',
                 pointerEvents: 'auto',
+                textDecoration: 'none',
+                display: 'inline-block',
                 transition: 'color 0.4s ease, transform 0.4s ease',
               }}
               whileHover={{ scale: 1.05, color: c.textBright }}
             >
               {ctaButton}
-            </motion.button>
+            </motion.a>
           </motion.div>
         )}
       </AnimatePresence>
