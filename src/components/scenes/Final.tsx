@@ -1,4 +1,6 @@
-// Final.tsx — theme-aware
+// Final.tsx
+// Final scene — closing narrative, delegating the final organized tree structure
+// to the background GlobalCanvas, and culminating in a minimal premium CTA.
 import { motion } from 'framer-motion';
 import { useLang } from '../../contexts/LanguageContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
@@ -9,9 +11,7 @@ export function Final() {
   const c        = useThemeColors();
   const t        = translations.final;
   const closing  = t.closing[lang] as readonly { text: string; size: string; color: string; delay: number }[];
-  const chain    = t.chain[lang] as readonly string[];
 
-  // Map the fixed color strings in translations to theme-aware equivalents
   const themeColor = (origColor: string): string => {
     if (origColor.includes('0.9'))  return c.textPrimary;
     if (origColor.includes('0.55')) return c.textSub;
@@ -21,28 +21,86 @@ export function Final() {
     return origColor;
   };
 
+  const ctaText = lang === 'es' ? 'Construyamos la siguiente.' : "Let's build the next one.";
+
   return (
-    <section id="final" style={{ minHeight: '200dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: '20dvh', background: c.bg, overflow: 'hidden', transition: 'background 0.5s ease' }} aria-label="Closing narrative">
+    <section
+      id="final"
+      style={{
+        minHeight: '180dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        paddingTop: '25dvh',
+        background: 'transparent', // Let parent canvas handle background
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+      }}
+      aria-label="Closing narrative"
+    >
       {/* Closing words */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem', textAlign: 'center', padding: '0 2rem', maxWidth: '700px', marginBottom: '8rem' }}>
         {closing.map((line) => (
-          <motion.p key={`${lang}-${line.text}`} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.4, delay: line.delay, ease: [0.16, 1, 0.3, 1] }} style={{ fontFamily: 'var(--font-sans)', fontWeight: 300, fontSize: line.size === 'large' ? 'clamp(1.8rem, 5vw, 3.5rem)' : 'clamp(0.9rem, 1.8vw, 1.1rem)', letterSpacing: line.size === 'large' ? '-0.03em' : '-0.01em', color: themeColor(line.color), lineHeight: 1.15 }}>
+          <motion.p
+            key={`${lang}-${line.text}`}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-5%' }}
+            transition={{ duration: 1.4, delay: line.delay, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontWeight: 300,
+              fontSize: line.size === 'large' ? 'clamp(1.8rem, 5vw, 3.5rem)' : 'clamp(0.9rem, 1.8vw, 1.1rem)',
+              letterSpacing: line.size === 'large' ? '-0.03em' : '-0.01em',
+              color: themeColor(line.color),
+              lineHeight: 1.15,
+            }}
+          >
             {line.text}
           </motion.p>
         ))}
       </div>
 
-      {/* Eternal chain */}
-      <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.5, delay: 6 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
-        {chain.map((label, i) => (
-          <motion.div key={`${lang}-${label}`} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 6.2 + i * 0.2 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <motion.div animate={{ background: c.chainPulse }} transition={{ duration: 3, delay: i * 0.4, repeat: Infinity, ease: 'easeInOut' }} style={{ width: 5, height: 5, borderRadius: '50%', border: `1px solid ${c.nodeStrokeMid}` }} />
-            <span style={{ fontSize: '0.62rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: c.textDim, margin: '0.4rem 0', fontFamily: 'var(--font-sans)' }}>{label}</span>
-            <div style={{ width: 1, height: 28, background: `linear-gradient(to bottom, ${c.lineMid}, ${c.lineWeak})` }} />
-          </motion.div>
-        ))}
-        {/* Line into darkness */}
-        <motion.div initial={{ height: 0, opacity: 0 }} whileInView={{ height: '40dvh', opacity: 1 }} viewport={{ once: true }} transition={{ duration: 2, delay: 7.5, ease: [0.16, 1, 0.3, 1] }} style={{ width: 1, background: `linear-gradient(to bottom, ${c.lineWeak}, transparent)` }} />
+      {/* CTA Button — fades in slowly after narrative is complete */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.8, delay: 4.8, ease: [0.16, 1, 0.3, 1] }}
+        style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+      >
+        <button
+          style={{
+            background: 'none',
+            border: `1px solid ${c.borderMid}`,
+            borderRadius: '24px',
+            padding: '0.75rem 2rem',
+            color: c.textPrimary,
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.85rem',
+            fontWeight: 400,
+            letterSpacing: '0.04em',
+            cursor: 'pointer',
+            transition: 'border-color 0.4s ease, color 0.4s ease, background-color 0.4s ease',
+            outline: 'none',
+          }}
+          onMouseEnter={e => {
+            const el = e.currentTarget;
+            el.style.borderColor = c.textPrimary;
+            el.style.backgroundColor = c.nodeIdle;
+          }}
+          onMouseLeave={e => {
+            const el = e.currentTarget;
+            el.style.borderColor = c.borderMid;
+            el.style.backgroundColor = 'transparent';
+          }}
+          onClick={() => {
+            window.location.href = 'mailto:hello@philosophy-site.com'; // subtle contact CTA action
+          }}
+        >
+          {ctaText}
+        </button>
       </motion.div>
     </section>
   );
