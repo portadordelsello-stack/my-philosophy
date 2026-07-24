@@ -54,7 +54,7 @@ export function Home() {
       ref={scrollTrackRef}
       style={{
         position: 'relative',
-        height: isMobile ? '450vh' : '950vh', // 450vh on mobile for short, responsive touch scrolling
+        height: isMobile ? '750vh' : '950vh', // 750vh on mobile for smooth, controlled pacing
         background: 'transparent',
         cursor: showCursor ? 'auto' : 'none', // hide cursor until CTA
       }}

@@ -187,8 +187,10 @@ export function TranslationCanvas({ progress, isCtaHovered = false }: Translatio
       ctx.save();
       ctx.translate(width / 2, height / 2);
 
-      // Apply responsive layout scale to keep visualization within screen bounds (+20% overall animation scale)
-      const layoutScale = Math.min(1.2, (width / 620) * 1.2);
+      // Apply responsive layout scale (+25% increase on mobile screens < 768px)
+      const isMobileScreen = width < 768;
+      const scaleMultiplier = isMobileScreen ? 1.5 : 1.2;
+      const layoutScale = Math.min(scaleMultiplier, (width / 620) * scaleMultiplier);
       ctx.scale(layoutScale, layoutScale);
 
       // ── Render States ──

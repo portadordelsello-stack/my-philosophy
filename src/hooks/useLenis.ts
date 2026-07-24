@@ -14,7 +14,7 @@ export function useLenis(): React.RefObject<Lenis | null> {
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       smoothWheel: true,
-      touchMultiplier: 2.5, // High touch sensitivity for short mobile swipes
+      touchMultiplier: 1.2, // Reduced touch sensitivity for controlled mobile scrolling
     });
 
     lenisRef.current = lenis;
