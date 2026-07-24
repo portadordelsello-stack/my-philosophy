@@ -2,13 +2,13 @@
 // Fixed top-right panel combining language (ES/EN) and theme (☀/◐) toggles.
 // Hidden during the film acts (1-9) to guarantee complete visual immersion,
 // fading in cleanly during the final Invitation stage (Act X).
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useLang } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface ControlsProps {
-  progress: number;
+  progress?: number;
 }
 
 // Minimal sun icon for light mode
@@ -34,20 +34,18 @@ function MoonIcon() {
   );
 }
 
-export function Controls({ progress }: ControlsProps) {
+export function Controls(_props?: ControlsProps) {
   const { lang, setLang } = useLang();
   const { theme, setTheme } = useTheme();
   const c = useThemeColors();
-
-  const isVisible = progress >= 0.90;
 
   const btnStyle = (active: boolean): React.CSSProperties => ({
     background: 'none',
     border: 'none',
     cursor: active ? 'default' : 'pointer',
-    padding: '0.3rem 0.45rem',
+    padding: '0.35rem 0.55rem',
     fontFamily: 'var(--font-sans)',
-    fontSize: '0.58rem',
+    fontSize: '0.62rem',
     fontWeight: 500,
     letterSpacing: '0.16em',
     textTransform: 'uppercase' as const,
@@ -67,58 +65,53 @@ export function Controls({ progress }: ControlsProps) {
   };
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            position: 'fixed',
-            top: '1.5rem',
-            right: '1.5rem',
-            zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0',
-            userSelect: 'none',
-            border: `1px solid ${c.border}`,
-            borderRadius: '6px',
-            padding: '0.1rem',
-            backdropFilter: 'blur(8px)',
-            background: theme === 'light' ? 'rgba(245,245,243,0.7)' : 'rgba(5,5,5,0.6)',
-            transition: 'background 0.5s ease, border-color 0.5s ease',
-            pointerEvents: 'auto', // enable click when visible
-          }}
-          aria-label="Site controls"
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        position: 'fixed',
+        top: '1.5rem',
+        right: '1.5rem',
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0',
+        userSelect: 'none',
+        border: `1px solid ${c.border}`,
+        borderRadius: '6px',
+        padding: '0.1rem',
+        backdropFilter: 'blur(8px)',
+        background: theme === 'light' ? 'rgba(245,245,243,0.7)' : 'rgba(5,5,5,0.6)',
+        transition: 'background 0.5s ease, border-color 0.5s ease',
+        pointerEvents: 'auto',
+      }}
+      aria-label="Site controls"
+    >
+      {/* Theme toggle */}
+      <button
+        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        style={btnStyle(false)}
+        aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+        title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+      >
+        {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+      </button>
+
+      <div style={sepStyle} />
+
+      {/* Language toggle */}
+      {(['es', 'en'] as const).map((l) => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          aria-pressed={lang === l}
+          style={btnStyle(lang === l)}
         >
-          {/* Theme toggle */}
-          <button
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            style={btnStyle(false)}
-            aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-            title={theme === 'light' ? 'Dark mode' : 'Light mode'}
-          >
-            {theme === 'light' ? <MoonIcon /> : <SunIcon />}
-          </button>
-
-          <div style={sepStyle} />
-
-          {/* Language toggle */}
-          {(['es', 'en'] as const).map((l) => (
-            <button
-              key={l}
-              onClick={() => setLang(l)}
-              aria-pressed={lang === l}
-              style={btnStyle(lang === l)}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </motion.div>
-      )}
-    </AnimatePresence>
+          {l.toUpperCase()}
+        </button>
+      ))}
+    </motion.div>
   );
 }
 // For safety, fallback if parent doesn't supply progress
