@@ -15,7 +15,16 @@ gsap.registerPlugin(ScrollTrigger);
 export function Home() {
   const [progress, setProgress] = useState(0);
   const [isCtaHovered, setIsCtaHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const scrollTrackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const track = scrollTrackRef.current;
@@ -26,6 +35,7 @@ export function Home() {
       start: 'top top',
       end: 'bottom bottom',
       scrub: true,
+      invalidateOnRefresh: true,
       onUpdate: (self) => {
         setProgress(self.progress);
       },
@@ -34,7 +44,7 @@ export function Home() {
     return () => {
       trigger.kill();
     };
-  }, []);
+  }, [isMobile]);
 
   // Hide hardware cursor during film to enforce cinematic immersion
   const showCursor = progress >= 0.90;
@@ -44,7 +54,7 @@ export function Home() {
       ref={scrollTrackRef}
       style={{
         position: 'relative',
-        height: '950vh', // long scroll track for smooth scrollytelling pacing
+        height: isMobile ? '450vh' : '950vh', // 450vh on mobile for short, responsive touch scrolling
         background: 'transparent',
         cursor: showCursor ? 'auto' : 'none', // hide cursor until CTA
       }}
