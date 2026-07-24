@@ -129,7 +129,7 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
         const term = '> SEARCH: REACT DEVELOPER / FULLSTACK';
         const crossLength = Math.max(0, (actProgress - 0.07) / 0.08); // cross out triggers at 7%
 
-        ctx.font = '13px var(--font-mono)';
+        ctx.font = '13px "JetBrains Mono", monospace';
         ctx.fillStyle = activeColors.textSecondary;
         ctx.textAlign = 'center';
         ctx.fillText(term, 0, 0);
@@ -162,7 +162,7 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           '“Customers call daily looking for updates”',
         ];
 
-        ctx.font = '300 22px var(--font-sans)';
+        ctx.font = '300 22px "Inter", sans-serif';
         ctx.fillStyle = activeColors.textMuted;
         ctx.textAlign = 'center';
 
@@ -201,13 +201,13 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           ctx.stroke();
 
           // Title (15% scaled font: 9px)
-          ctx.font = '9px var(--font-sans)';
+          ctx.font = '9px "Inter", sans-serif';
           ctx.fillStyle = activeColors.textPrimary;
           ctx.textAlign = 'center';
           ctx.fillText(boxLabels[i], boxX[i], boxY - 14);
 
           // Lines (15% scaled font: 7px)
-          ctx.font = '7px var(--font-mono)';
+          ctx.font = '7px "JetBrains Mono", monospace';
           ctx.fillStyle = activeColors.textSecondary;
           ctx.fillText('id: UUID', boxX[i], boxY + 2);
           ctx.fillText('status: STR', boxX[i], boxY + 13);
@@ -255,7 +255,7 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           '}',
         ];
 
-        ctx.font = '10px var(--font-mono)';
+        ctx.font = '10px "JetBrains Mono", monospace';
         ctx.fillStyle = activeColors.monoCode;
         ctx.textAlign = 'left';
 
@@ -293,13 +293,13 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
         ctx.stroke();
 
         // Widget titles (15% scaled font: 10px)
-        ctx.font = '10px var(--font-sans)';
+        ctx.font = '10px "Inter", sans-serif';
         ctx.fillStyle = activeColors.textPrimary;
         ctx.textAlign = 'left';
         ctx.fillText('DIAGNOSTIC PIPELINE ACTIVE', wX - wW / 2 + 15, wY - wH / 2 + 22);
 
         // Value text (15% scaled font: 28px)
-        ctx.font = '28px var(--font-sans)';
+        ctx.font = '28px "Inter", sans-serif';
         ctx.fillText('94.8%', wX - wW / 2 + 15, wY - wH / 2 + 58);
 
         // Draw line chart inside widget (width scaled dynamically)
