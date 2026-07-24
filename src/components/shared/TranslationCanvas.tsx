@@ -151,19 +151,19 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           p.opacity += (0.08 - p.opacity) * ease;
         });
       } else if (actProgress >= 0.15 && actProgress < 0.35) {
-        // Act II: Messy customer quotes float (Scaled up further to 22px)
+        // Act II: Messy customer quotes float (Scaled to 19px, bold 400, secondary color)
         const quotes = lang === 'es' ? [
-          'La adopción nunca ocurrió. El sistema terminó siendo reemplazado por las herramientas de siempre',
-          'Cuatro meses después, el equipo había vuelto a Excel y a sus procesos de siempre',
-          'El software cambió. Los hábitos no',
+          'La adopción nunca ocurrió.',
+          'Cuatro meses después, el equipo había vuelto a Excel y a sus procesos de siempre.',
+          'El software cambió. Los hábitos no.',
         ] : [
-          'Adoption never happened. The system ended up replaced by the same old tools',
-          'Four months later, the team had returned to Excel and their usual processes',
-          'The software changed. Habits didn\'t',
+          'Adoption never happened.',
+          'Four months later, the team had gone back to Excel and their old workflows.',
+          'The software changed. The habits didn\'t.',
         ];
 
-        ctx.font = '300 19px "Inter", sans-serif';
-        ctx.fillStyle = activeColors.textMuted;
+        ctx.font = '400 19px "Inter", sans-serif';
+        ctx.fillStyle = activeColors.textSecondary;
         ctx.textAlign = 'center';
 
         quotes.forEach((q, idx) => {
