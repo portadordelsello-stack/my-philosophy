@@ -153,13 +153,13 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
       } else if (actProgress >= 0.15 && actProgress < 0.35) {
         // Act II: Messy customer quotes float (Scaled up further to 22px)
         const quotes = lang === 'es' ? [
-          '“Perdemos reportes en papel cada semana”',
-          '“Los técnicos olvidan diagnosticar el equipo”',
-          '“Clientes llaman a diario buscando actualizaciones”',
+          '“La adopción nunca ocurrió. El sistema terminó siendo reemplazado por las herramientas de siempre”',
+          '“Cuatro meses después, el equipo había vuelto a Excel y a sus procesos de siempre”',
+          '“El software cambió. Los hábitos no”',
         ] : [
-          '“We lose paper reports every week”',
-          '“Technicians forget to diagnose equipment”',
-          '“Customers call daily looking for updates”',
+          '“Adoption never happened. The system ended up replaced by the same old tools”',
+          '“Four months later, the team had returned to Excel and their usual processes”',
+          '“The software changed. Habits didn\'t”',
         ];
 
         ctx.font = '300 22px "Inter", sans-serif';
