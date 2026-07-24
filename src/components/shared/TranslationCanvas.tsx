@@ -208,67 +208,127 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           p.opacity += (targetOpacity - p.opacity) * ease;
         });
       } else if (actProgress >= 0.35 && actProgress < 0.55) {
-        // Act III: Blueprint / Database boxes (Scaled up 15%)
-        // Draw 3 schematic boxes
-        const boxLabels = ['EQUIPMENT', 'DIAGNOSIS', 'TICKET'];
-        const boxX = [-160, 0, 160];
-        const boxY = -30;
-        const boxW = 115; // 15% increase (100 * 1.15)
-        const boxH = 69;  // 15% increase (60 * 1.15)
+        // Act III: Blueprint / Database boxes (Organic Transition Timeline)
+        const act3Progress = (actProgress - 0.35) / 0.20; // local progress (0.0 to 1.0)
+        const boxLabels = ['equipment', 'diagnosis', 'ticket'];
+        const boxW = 115;
+        const boxH = 69;
 
-        ctx.strokeStyle = activeColors.lineStrong;
-        ctx.lineWidth = 1;
-        ctx.fillStyle = activeColors.nodeIdle;
+        // Label drift offsets in Phase 1 (Floating far away)
+        const driftEqX = -190 + Math.sin(time * 0.8) * 15;
+        const driftEqY = -80 + Math.cos(time * 0.8) * 15;
 
-        for (let i = 0; i < 3; i++) {
+        const driftDiagX = 20 + Math.cos(time * 0.7) * 20;
+        const driftDiagY = 60 + Math.sin(time * 0.7) * 15;
+
+        const driftTickX = 190 + Math.sin(time * 0.9) * 15;
+        const driftTickY = -100 + Math.cos(time * 0.9) * 20;
+
+        // Final aligned positions
+        const finalX = [-160, 0, 160];
+        const finalY = -30;
+
+        // Phase local triggers
+        const textEqOpacity = Math.max(0, Math.min(1, act3Progress / 0.12));
+        const textDiagOpacity = Math.max(0, Math.min(1, (act3Progress - 0.12) / 0.12));
+        const textTickOpacity = Math.max(0, Math.min(1, (act3Progress - 0.24) / 0.12));
+        const labelOpacities = [textEqOpacity, textDiagOpacity, textTickOpacity];
+
+        // Lerp progress for alignment (0.45 to 0.70)
+        const alignProgress = Math.max(0, Math.min(1, (act3Progress - 0.45) / 0.25));
+
+        // Compute current coordinates
+        const currentX = [
+          finalX[0] * alignProgress + driftEqX * (1 - alignProgress),
+          finalX[1] * alignProgress + driftDiagX * (1 - alignProgress),
+          finalX[2] * alignProgress + driftTickX * (1 - alignProgress),
+        ];
+
+        const currentY = [
+          finalY * alignProgress + driftEqY * (1 - alignProgress),
+          finalY * alignProgress + driftDiagY * (1 - alignProgress),
+          finalY * alignProgress + driftTickY * (1 - alignProgress),
+        ];
+
+        // Opacity for the cards and connections in Phase 3 (0.70 to 1.0)
+        const cardOpacity = Math.max(0, Math.min(1, (act3Progress - 0.70) / 0.30));
+
+        // Draw database card structures (only as they materialize)
+        if (cardOpacity > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = cardOpacity;
+          ctx.strokeStyle = activeColors.lineStrong;
+          ctx.lineWidth = 1;
+          ctx.fillStyle = activeColors.nodeIdle;
+
+          for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.rect(currentX[i] - boxW / 2, currentY[i] - boxH / 2, boxW, boxH);
+            ctx.fill();
+            ctx.stroke();
+
+            // Lines
+            ctx.font = '7px "JetBrains Mono", monospace';
+            ctx.fillStyle = activeColors.textSecondary;
+            ctx.textAlign = 'center';
+            ctx.fillText('id: UUID', currentX[i], currentY[i] + 2);
+            ctx.fillText('status: STR', currentX[i], currentY[i] + 13);
+          }
+
+          // Draw connections between boxes
           ctx.beginPath();
-          ctx.rect(boxX[i] - boxW / 2, boxY - boxH / 2, boxW, boxH);
-          ctx.fill();
+          ctx.moveTo(currentX[0] + boxW / 2, currentY[0]);
+          ctx.lineTo(currentX[1] - boxW / 2, currentY[1]);
+          ctx.moveTo(currentX[1] + boxW / 2, currentY[1]);
+          ctx.lineTo(currentX[2] - boxW / 2, currentY[2]);
+          ctx.strokeStyle = activeColors.lineStrong;
           ctx.stroke();
-
-          // Title (15% scaled font: 9px)
-          ctx.font = '9px "Inter", sans-serif';
-          ctx.fillStyle = activeColors.textPrimary;
-          ctx.textAlign = 'center';
-          ctx.fillText(boxLabels[i], boxX[i], boxY - 14);
-
-          // Lines (15% scaled font: 7px)
-          ctx.font = '7px "JetBrains Mono", monospace';
-          ctx.fillStyle = activeColors.textSecondary;
-          ctx.fillText('id: UUID', boxX[i], boxY + 2);
-          ctx.fillText('status: STR', boxX[i], boxY + 13);
+          ctx.restore();
         }
 
-        // Draw connections between boxes
-        ctx.beginPath();
-        ctx.moveTo(boxX[0] + boxW / 2, boxY);
-        ctx.lineTo(boxX[1] - boxW / 2, boxY);
-        ctx.moveTo(boxX[1] + boxW / 2, boxY);
-        ctx.lineTo(boxX[2] - boxW / 2, boxY);
-        ctx.strokeStyle = activeColors.lineStrong;
-        ctx.stroke();
+        // Draw the 3 text labels
+        for (let i = 0; i < 3; i++) {
+          if (labelOpacities[i] > 0.01) {
+            ctx.save();
+            ctx.globalAlpha = labelOpacities[i];
+            ctx.font = '9px "Inter", sans-serif';
+            ctx.fillStyle = activeColors.textPrimary;
+            ctx.textAlign = 'center';
+            
+            // Slide title up to header position as card outlines fade in
+            const titleYOffset = -14 * cardOpacity;
+            ctx.fillText(boxLabels[i], currentX[i], currentY[i] + titleYOffset);
+            ctx.restore();
+          }
+        }
 
-        // Particles snap dynamically to borders of the boxes
+        // Particles snap to borders of the boxes or orbit the drifting labels
         particles.forEach((p, i) => {
           const boxIdx = i % 3;
           const edge = i % 4;
 
-          let tx = boxX[boxIdx];
-          let ty = boxY;
+          let tx = currentX[boxIdx];
+          let ty = currentY[boxIdx];
 
-          if (edge === 0 || edge === 1) {
-            const localOffset = ((i * 17) % (boxW - 10)) - (boxW - 10) / 2;
-            tx += localOffset;
-            ty += edge === 0 ? -boxH / 2 : boxH / 2;
+          if (cardOpacity > 0.1) {
+            if (edge === 0 || edge === 1) {
+              const localOffset = ((i * 17) % (boxW - 10)) - (boxW - 10) / 2;
+              tx += localOffset;
+              ty += edge === 0 ? -boxH / 2 : boxH / 2;
+            } else {
+              const localOffset = ((i * 17) % (boxH - 10)) - (boxH - 10) / 2;
+              tx += edge === 2 ? -boxW / 2 : boxW / 2;
+              ty += localOffset;
+            }
           } else {
-            const localOffset = ((i * 17) % (boxH - 10)) - (boxH - 10) / 2;
-            tx += edge === 2 ? -boxW / 2 : boxW / 2;
-            ty += localOffset;
+            const angle = i * 2.4;
+            tx += Math.cos(angle) * 45;
+            ty += Math.sin(angle) * 45;
           }
 
           p.x += (tx - p.x) * ease;
           p.y += (ty - p.y) * ease;
-          p.opacity += (0.45 - p.opacity) * ease;
+          p.opacity += ((0.45 * labelOpacities[boxIdx]) - p.opacity) * ease;
           p.r = 1.0;
         });
       } else if (actProgress >= 0.55 && actProgress < 0.75) {
