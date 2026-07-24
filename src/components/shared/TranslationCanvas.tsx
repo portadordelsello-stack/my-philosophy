@@ -332,34 +332,98 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           p.r = 1.0;
         });
       } else if (actProgress >= 0.55 && actProgress < 0.75) {
-        // Act IV: Monospace Code Block
-        const codeLines = [
-          'function syncDiagnostics(equipment) {',
-          '  return db.tickets',
-          '    .filter(t => t.id === equipment.id)',
-          '    .map(t => t.status);',
-          '}',
-        ];
+        // Act IV: Code morphing and reorganization (The Structure Condenses)
+        const act4Progress = (actProgress - 0.55) / 0.20; // 0.0 to 1.0
+        
+        // Morph progress (0.0 to 0.3)
+        const morphProgress = Math.min(1, act4Progress / 0.30);
+        
+        // Swap progress (0.40 to 0.65)
+        const swapProgress = Math.max(0, Math.min(1, (act4Progress - 0.40) / 0.25));
 
+        // DB card dimensions for morphing
+        const boxW = 115 * (1 - morphProgress);
+        const boxH = 69 * (1 - morphProgress);
+
+        // Card positions from Act III
+        const startX = [-160, 0, 160];
+        const startY = -30;
+
+        // Target positions inside the code block
+        const eqTargetY = -15 + 15 * swapProgress;       // slides from -15 to 0
+        const diagTargetY = 0 - 15 * swapProgress;       // slides from 0 to -15
+        const tickTargetY = 15;
+
+        // Interpolated positions for the properties
+        const eqX = startX[0] * (1 - morphProgress) - 50 * morphProgress;
+        const eqY = startY * (1 - morphProgress) + eqTargetY * morphProgress;
+
+        const diagX = startX[1] * (1 - morphProgress) - 50 * morphProgress;
+        const diagY = startY * (1 - morphProgress) + diagTargetY * morphProgress;
+
+        const tickX = startX[2] * (1 - morphProgress) - 50 * morphProgress;
+        const tickY = startY * (1 - morphProgress) + tickTargetY * morphProgress;
+
+        // Draw collapsing DB borders
+        if (morphProgress < 0.99) {
+          ctx.save();
+          ctx.globalAlpha = 1 - morphProgress;
+          ctx.strokeStyle = activeColors.lineStrong;
+          ctx.lineWidth = 1;
+          for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            const cx = startX[i] * (1 - morphProgress) - 50 * morphProgress;
+            const cy = startY * (1 - morphProgress) + (i === 0 ? eqTargetY : i === 1 ? diagTargetY : tickTargetY) * morphProgress;
+            ctx.rect(cx - boxW / 2, cy - boxH / 2, boxW, boxH);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        // Draw the TS interface syntax fading in
+        const syntaxOpacity = Math.max(0, (act4Progress - 0.20) / 0.20);
+        if (syntaxOpacity > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = syntaxOpacity;
+          ctx.font = '10px "JetBrains Mono", monospace';
+          ctx.fillStyle = activeColors.textSecondary;
+          ctx.textAlign = 'left';
+
+          // Outer syntax
+          ctx.fillText('interface Pipeline {', -70, -30);
+          ctx.fillText('}', -70, 30);
+
+          // Type declarations
+          ctx.fillStyle = activeColors.monoCode;
+          ctx.fillText(': UUID;', 25, eqY);
+          ctx.fillText(': UUID;', 25, tickY);
+
+          // Living type changes based on swapProgress
+          const diagType = swapProgress > 0.7 ? ': Diagnostics;' : swapProgress > 0.2 ? ': Analysis;' : ': string;';
+          ctx.fillText(diagType, 25, diagY);
+          ctx.restore();
+        }
+
+        // Draw the property labels (the condensed structure names)
         ctx.font = '10px "JetBrains Mono", monospace';
         ctx.fillStyle = activeColors.monoCode;
         ctx.textAlign = 'left';
+        ctx.fillText('  equipment', eqX, eqY);
+        ctx.fillText('  diagnosis', diagX, diagY);
+        ctx.fillText('  ticket', tickX, tickY);
 
-        codeLines.forEach((line, idx) => {
-          ctx.fillText(line, -160, -40 + idx * 18);
-        });
-
-        // Particles line up next to characters
+        // Particles flow from DB positions to line up with the code text
         particles.forEach((p, i) => {
-          const lineIdx = i % 5;
-          const charIdx = (i * 3) % codeLines[lineIdx].length;
-          const tx = -160 + charIdx * 6;
-          const ty = -36 + lineIdx * 18;
+          const idx = i % 3;
+          let tx = idx === 0 ? eqX : idx === 1 ? diagX : tickX;
+          let ty = idx === 0 ? eqY : idx === 1 ? diagY : tickY;
+
+          tx += 40 + (i % 8) * 8;
 
           p.x += (tx - p.x) * ease;
           p.y += (ty - p.y) * ease;
-          p.opacity += (0.5 - p.opacity) * ease;
-          p.r = 1.2;
+          p.opacity += (0.25 - p.opacity) * ease;
+          p.r = 1.0;
         });
       } else if (actProgress >= 0.75 && actProgress < 0.90) {
         // Act V: Dashboard Widget (Scaled up 15%)
