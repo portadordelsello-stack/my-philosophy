@@ -43,17 +43,23 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    const dpr = window.devicePixelRatio || 1;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
 
     // Coordinate pool
     const PARTICLE_COUNT = 150;
     const particles: Particle[] = [];
+    const getLayoutScale = (w: number) => Math.min(1.0, w / 620);
+    const initialScale = getLayoutScale(width);
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       particles.push({
-        x: (Math.random() - 0.5) * width,
-        y: (Math.random() - 0.5) * height,
+        x: (Math.random() - 0.5) * (width / initialScale),
+        y: (Math.random() - 0.5) * (height / initialScale),
         r: 1.5,
         opacity: 0,
         color: c.textSecondary,
@@ -63,8 +69,11 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
     }
 
     const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
     };
     window.addEventListener('resize', handleResize);
 
@@ -108,6 +117,10 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
       ctx.save();
       ctx.translate(width / 2, height / 2);
 
+      // Apply responsive layout scale to keep visualization within screen bounds
+      const layoutScale = Math.min(1.0, width / 620);
+      ctx.scale(layoutScale, layoutScale);
+
       // ── Render States ──
       const ease = reducedMotion ? 1.0 : 0.08;
 
@@ -138,7 +151,7 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           p.opacity += (0.08 - p.opacity) * ease;
         });
       } else if (actProgress >= 0.15 && actProgress < 0.35) {
-        // Act II: Messy customer quotes float
+        // Act II: Messy customer quotes float (Scaled up further to 22px)
         const quotes = lang === 'es' ? [
           '“Perdemos reportes en papel cada semana”',
           '“Los técnicos olvidan diagnosticar el equipo”',
@@ -149,13 +162,13 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           '“Customers call daily looking for updates”',
         ];
 
-        ctx.font = '300 12px var(--font-sans)';
+        ctx.font = '300 22px var(--font-sans)';
         ctx.fillStyle = activeColors.textMuted;
         ctx.textAlign = 'center';
 
         quotes.forEach((q, idx) => {
           const drift = Math.sin(time + idx) * 8;
-          ctx.fillText(q, 0, -40 + idx * 40 + drift);
+          ctx.fillText(q, 0, -65 + idx * 65 + drift);
         });
 
         // Particles gather around text areas
@@ -163,19 +176,19 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           const qIdx = i % 3;
           const angle = i * 2.4;
           const tx = Math.cos(angle) * 180 + (Math.sin(time + i) * 12);
-          const ty = -40 + qIdx * 40 + (Math.cos(time + i) * 6);
+          const ty = -65 + qIdx * 65 + (Math.cos(time + i) * 6);
           p.x += (tx - p.x) * ease;
           p.y += (ty - p.y) * ease;
           p.opacity += (0.16 - p.opacity) * ease;
         });
       } else if (actProgress >= 0.35 && actProgress < 0.55) {
-        // Act III: Blueprint / Database boxes
+        // Act III: Blueprint / Database boxes (Scaled up 15%)
         // Draw 3 schematic boxes
         const boxLabels = ['EQUIPMENT', 'DIAGNOSIS', 'TICKET'];
-        const boxX = [-140, 0, 140];
+        const boxX = [-160, 0, 160];
         const boxY = -30;
-        const boxW = 100;
-        const boxH = 60;
+        const boxW = 115; // 15% increase (100 * 1.15)
+        const boxH = 69;  // 15% increase (60 * 1.15)
 
         ctx.strokeStyle = activeColors.lineStrong;
         ctx.lineWidth = 1;
@@ -187,17 +200,17 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           ctx.fill();
           ctx.stroke();
 
-          // Title
-          ctx.font = '8px var(--font-sans)';
+          // Title (15% scaled font: 9px)
+          ctx.font = '9px var(--font-sans)';
           ctx.fillStyle = activeColors.textPrimary;
           ctx.textAlign = 'center';
-          ctx.fillText(boxLabels[i], boxX[i], boxY - 12);
+          ctx.fillText(boxLabels[i], boxX[i], boxY - 14);
 
-          // Lines
-          ctx.font = '6px var(--font-mono)';
+          // Lines (15% scaled font: 7px)
+          ctx.font = '7px var(--font-mono)';
           ctx.fillStyle = activeColors.textSecondary;
           ctx.fillText('id: UUID', boxX[i], boxY + 2);
-          ctx.fillText('status: STR', boxX[i], boxY + 12);
+          ctx.fillText('status: STR', boxX[i], boxY + 13);
         }
 
         // Draw connections between boxes
@@ -209,19 +222,23 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
         ctx.strokeStyle = activeColors.lineStrong;
         ctx.stroke();
 
-        // Particles snap to borders of the boxes
+        // Particles snap dynamically to borders of the boxes
         particles.forEach((p, i) => {
           const boxIdx = i % 3;
           const edge = i % 4;
-          const localOffset = ((i * 17) % 50) - 25;
 
           let tx = boxX[boxIdx];
           let ty = boxY;
 
-          if (edge === 0) { tx += localOffset; ty -= boxH / 2; }
-          if (edge === 1) { tx += localOffset; ty += boxH / 2; }
-          if (edge === 2) { tx -= boxW / 2; ty += localOffset; }
-          if (edge === 3) { tx += boxW / 2; ty += localOffset; }
+          if (edge === 0 || edge === 1) {
+            const localOffset = ((i * 17) % (boxW - 10)) - (boxW - 10) / 2;
+            tx += localOffset;
+            ty += edge === 0 ? -boxH / 2 : boxH / 2;
+          } else {
+            const localOffset = ((i * 17) % (boxH - 10)) - (boxH - 10) / 2;
+            tx += edge === 2 ? -boxW / 2 : boxW / 2;
+            ty += localOffset;
+          }
 
           p.x += (tx - p.x) * ease;
           p.y += (ty - p.y) * ease;
@@ -259,11 +276,11 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           p.r = 1.2;
         });
       } else if (actProgress >= 0.75 && actProgress < 0.90) {
-        // Act V: Dashboard Widget
+        // Act V: Dashboard Widget (Scaled up 15%)
         const wX = 0;
         const wY = 0;
-        const wW = 260;
-        const wH = 150;
+        const wW = 300; // 15% increase (260 * 1.15 ~ 300)
+        const wH = 172; // 15% increase (150 * 1.15 ~ 172)
 
         ctx.strokeStyle = activeColors.lineStrong;
         ctx.lineWidth = 1;
@@ -275,30 +292,31 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
         ctx.fill();
         ctx.stroke();
 
-        // Widget titles
-        ctx.font = '9px var(--font-sans)';
+        // Widget titles (15% scaled font: 10px)
+        ctx.font = '10px var(--font-sans)';
         ctx.fillStyle = activeColors.textPrimary;
         ctx.textAlign = 'left';
-        ctx.fillText('DIAGNOSTIC PIPELINE ACTIVE', wX - wW / 2 + 15, wY - wH / 2 + 20);
+        ctx.fillText('DIAGNOSTIC PIPELINE ACTIVE', wX - wW / 2 + 15, wY - wH / 2 + 22);
 
-        ctx.font = '24px var(--font-sans)';
-        ctx.fillText('94.8%', wX - wW / 2 + 15, wY - wH / 2 + 52);
+        // Value text (15% scaled font: 28px)
+        ctx.font = '28px var(--font-sans)';
+        ctx.fillText('94.8%', wX - wW / 2 + 15, wY - wH / 2 + 58);
 
-        // Draw line chart inside widget
+        // Draw line chart inside widget (width scaled dynamically)
         ctx.beginPath();
         ctx.strokeStyle = activeColors.lineStrong;
         ctx.lineWidth = 1.5;
-        for (let j = 0; j < 140; j += 10) {
-          const cx = wX - wW / 2 + 105 + j;
-          const cy = wY + 20 + Math.sin(j * 0.15 - time * 2) * 12;
+        for (let j = 0; j <= 150; j += 10) {
+          const cx = wX - wW / 2 + 125 + j;
+          const cy = wY + 22 + Math.sin(j * 0.13 - time * 2) * 15;
           if (j === 0) ctx.moveTo(cx, cy);
           else ctx.lineTo(cx, cy);
         }
         ctx.stroke();
 
         // Pulsating dot on chart
-        const dotX = wX - wW / 2 + 235;
-        const dotY = wY + 20 + Math.sin(130 * 0.15 - time * 2) * 12;
+        const dotX = wX - wW / 2 + 275;
+        const dotY = wY + 22 + Math.sin(150 * 0.13 - time * 2) * 15;
         ctx.beginPath();
         ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
         ctx.fillStyle = activeColors.textBright;
@@ -307,8 +325,8 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
         // Particles flow like active metrics inside the chart
         particles.forEach((p, i) => {
           const progressLocal = ((i * 0.05 + time * 0.25) % 1.0);
-          const tx = wX - wW / 2 + 105 + progressLocal * 130;
-          const ty = wY + 20 + Math.sin((progressLocal * 130) * 0.15 - time * 2) * 12;
+          const tx = wX - wW / 2 + 125 + progressLocal * 150;
+          const ty = wY + 22 + Math.sin((progressLocal * 150) * 0.13 - time * 2) * 15;
 
           p.x += (tx - p.x) * ease;
           p.y += (ty - p.y) * ease;

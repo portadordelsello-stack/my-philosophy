@@ -61,29 +61,44 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
         padding: '0 2rem',
       }}
     >
-      {/* ── Main Narrative Text Lines ── */}
+      {/* ── Main Narrative Text Lines: Positioned at the bottom to avoid overlapping centered canvas drawings ── */}
       <AnimatePresence mode="wait">
         {activeLine && (
-          <motion.p
-            key={`${lang}-${activeLine.text}`}
-            initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -15, filter: 'blur(6px)' }}
-            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          <div
             style={{
-              fontFamily: 'var(--font-sans)',
-              fontWeight: 300,
-              fontSize: 'clamp(1.4rem, 4vw, 2.1rem)',
-              letterSpacing: '-0.02em',
-              color: c.textPrimary,
-              textAlign: 'center',
-              maxWidth: '680px',
-              lineHeight: 1.35,
-              whiteSpace: 'pre-line',
+              position: 'absolute',
+              bottom: '12dvh',
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+              padding: '0 2rem',
+              boxSizing: 'border-box',
             }}
           >
-            {activeLine.text}
-          </motion.p>
+            <motion.p
+              key={`${lang}-${activeLine.text}`}
+              initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -15, filter: 'blur(6px)' }}
+              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontWeight: 300,
+                fontSize: 'clamp(1.4rem, 3.6vw, 2.1rem)', // Increased 30% from clamp(1.1rem, 2.8vw, 1.6rem)
+                letterSpacing: '-0.01em',
+                color: c.textPrimary,
+                textAlign: 'center',
+                maxWidth: '680px',
+                lineHeight: 1.4,
+                whiteSpace: 'pre-line',
+                textShadow: '0 2px 10px rgba(0,0,0,0.6)',
+              }}
+            >
+              {activeLine.text}
+            </motion.p>
+          </div>
         )}
       </AnimatePresence>
 
@@ -108,7 +123,7 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
               style={{
                 fontFamily: 'var(--font-sans)',
                 fontWeight: 300,
-                fontSize: 'clamp(1.2rem, 3.2vw, 1.8rem)',
+                fontSize: 'clamp(1.55rem, 4.2vw, 2.35rem)', // Increased 30% from clamp(1.2rem, 3.2vw, 1.8rem)
                 letterSpacing: '-0.02em',
                 color: c.textSecondary,
                 lineHeight: 1.3,
