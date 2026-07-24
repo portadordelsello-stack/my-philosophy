@@ -125,21 +125,29 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
       const ease = reducedMotion ? 1.0 : 0.08;
 
       if (actProgress < 0.15) {
-        // Act I: Search query React Developer
-        const term = '> SEARCH: REACT DEVELOPER / FULLSTACK';
-        const crossLength = Math.max(0, (actProgress - 0.07) / 0.08); // cross out triggers at 7%
+        // Act I: Ambient shifting keywords (representing looking for tools)
+        const keywords = ['React', 'Fullstack', 'AI', 'Automation', 'ERP', 'CRM'];
+        const totalKeywords = keywords.length;
+        
+        const keywordIdx = Math.min(
+          totalKeywords - 1,
+          Math.floor((actProgress / 0.11) * totalKeywords)
+        );
+        const term = keywords[keywordIdx];
 
-        ctx.font = '13px "JetBrains Mono", monospace';
+        ctx.font = '300 24px "Inter", sans-serif';
         ctx.fillStyle = activeColors.textSecondary;
         ctx.textAlign = 'center';
         ctx.fillText(term, 0, 0);
 
+        const crossLength = Math.max(0, (actProgress - 0.11) / 0.035); // cross out final word from 11% to 14.5%
         if (crossLength > 0) {
+          const textWidth = ctx.measureText(term).width;
           ctx.beginPath();
-          ctx.moveTo(-150, -4);
-          ctx.lineTo(-150 + 300 * Math.min(1, crossLength), -4);
+          ctx.moveTo(-textWidth / 2 - 4, -8);
+          ctx.lineTo(-textWidth / 2 - 4 + (textWidth + 8) * Math.min(1, crossLength), -8);
           ctx.strokeStyle = '#ff6464';
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 2.0;
           ctx.stroke();
         }
 
