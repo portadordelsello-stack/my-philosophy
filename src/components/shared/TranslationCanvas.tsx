@@ -426,63 +426,93 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           p.r = 1.0;
         });
       } else if (actProgress >= 0.75 && actProgress < 0.90) {
-        // Act V: Dashboard Widget (Scaled up 15%)
-        const wX = 0;
-        const wY = 0;
-        const wW = 300; // 15% increase (260 * 1.15 ~ 300)
-        const wH = 172; // 15% increase (150 * 1.15 ~ 172)
-
-        ctx.strokeStyle = activeColors.lineStrong;
-        ctx.lineWidth = 1;
-        ctx.fillStyle = activeColors.nodeIdle;
-
-        // Draw widget box
+        // Act V: System Engine (Abstract data pipeline, non-SaaS)
+        ctx.strokeStyle = activeColors.line;
+        ctx.lineWidth = 0.5;
+        
+        // Inner blueprint ring
         ctx.beginPath();
-        ctx.rect(wX - wW / 2, wY - wH / 2, wW, wH);
-        ctx.fill();
+        ctx.arc(0, 0, 60, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Widget titles (15% scaled font: 10px)
-        ctx.font = '10px "Inter", sans-serif';
+        // Outer blueprint ring
+        ctx.beginPath();
+        ctx.arc(0, 0, 110, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Pulsing central system core
+        const corePulse = 6 + Math.sin(time * 3.5) * 1.8;
+        ctx.beginPath();
+        ctx.arc(0, 0, corePulse, 0, Math.PI * 2);
         ctx.fillStyle = activeColors.textPrimary;
-        ctx.textAlign = 'left';
-        ctx.fillText('DIAGNOSTIC PIPELINE ACTIVE', wX - wW / 2 + 15, wY - wH / 2 + 22);
-
-        // Value text (15% scaled font: 28px)
-        ctx.font = '28px "Inter", sans-serif';
-        ctx.fillText('94.8%', wX - wW / 2 + 15, wY - wH / 2 + 58);
-
-        // Draw line chart inside widget (width scaled dynamically)
-        ctx.beginPath();
-        ctx.strokeStyle = activeColors.lineStrong;
-        ctx.lineWidth = 1.5;
-        for (let j = 0; j <= 150; j += 10) {
-          const cx = wX - wW / 2 + 125 + j;
-          const cy = wY + 22 + Math.sin(j * 0.13 - time * 2) * 15;
-          if (j === 0) ctx.moveTo(cx, cy);
-          else ctx.lineTo(cx, cy);
-        }
-        ctx.stroke();
-
-        // Pulsating dot on chart
-        const dotX = wX - wW / 2 + 275;
-        const dotY = wY + 22 + Math.sin(150 * 0.13 - time * 2) * 15;
-        ctx.beginPath();
-        ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
-        ctx.fillStyle = activeColors.textBright;
         ctx.fill();
 
-        // Particles flow like active metrics inside the chart
+        ctx.font = '7px "JetBrains Mono", monospace';
+        ctx.fillStyle = activeColors.textSecondary;
+        ctx.textAlign = 'center';
+        ctx.fillText('system_core', 0, 15);
+
+        // Calculate orbital node coordinates
+        const n1x = Math.cos(time * 0.5) * 60;
+        const n1y = Math.sin(time * 0.5) * 60;
+
+        const n2x = Math.cos(time * 0.5 + Math.PI) * 60;
+        const n2y = Math.sin(time * 0.5 + Math.PI) * 60;
+
+        const n3x = Math.cos(-time * 0.25) * 110;
+        const n3y = Math.sin(-time * 0.25) * 110;
+
+        const n4x = Math.cos(-time * 0.25 + Math.PI) * 110;
+        const n4y = Math.sin(-time * 0.25 + Math.PI) * 110;
+
+        // Dotted connection lines between core and nodes
+        ctx.save();
+        ctx.setLineDash([2, 4]);
+        ctx.strokeStyle = activeColors.lineStrong;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.lineTo(n1x, n1y);
+        ctx.moveTo(0, 0); ctx.lineTo(n2x, n2y);
+        ctx.moveTo(0, 0); ctx.lineTo(n3x, n3y);
+        ctx.moveTo(0, 0); ctx.lineTo(n4x, n4y);
+        ctx.stroke();
+        ctx.restore();
+
+        // Draw system nodes and small metadata labels
+        const nodes = [
+          [n1x, n1y, 'node.01'],
+          [n2x, n2y, 'node.02'],
+          [n3x, n3y, 'tx.rate: 94.8%'],
+          [n4x, n4y, 'state: active']
+        ];
+
+        nodes.forEach(([nx, ny, label]) => {
+          ctx.beginPath();
+          ctx.arc(nx as number, ny as number, 3, 0, Math.PI * 2);
+          ctx.fillStyle = activeColors.textPrimary;
+          ctx.fill();
+
+          ctx.font = '7px "JetBrains Mono", monospace';
+          ctx.fillStyle = activeColors.textSecondary;
+          ctx.textAlign = 'left';
+          ctx.fillText(label as string, (nx as number) + 6, (ny as number) + 2);
+        });
+
+        // Particles flow dynamically along inner and outer orbits
         particles.forEach((p, i) => {
-          const progressLocal = ((i * 0.05 + time * 0.25) % 1.0);
-          const tx = wX - wW / 2 + 125 + progressLocal * 150;
-          const ty = wY + 22 + Math.sin((progressLocal * 150) * 0.13 - time * 2) * 15;
+          const orbitIdx = i % 2;
+          const radius = orbitIdx === 0 ? 60 : 110;
+          const speedFactor = orbitIdx === 0 ? 0.5 : -0.25;
+          const offsetAngle = (i * 12) % 360;
+
+          const angle = time * speedFactor + offsetAngle * (Math.PI / 180);
+          const tx = Math.cos(angle) * radius + (Math.sin(time + i) * 6);
+          const ty = Math.sin(angle) * radius + (Math.cos(time + i) * 6);
 
           p.x += (tx - p.x) * ease;
           p.y += (ty - p.y) * ease;
-          p.opacity += (0.8 - p.opacity) * ease;
-          p.r = 1.8;
-          p.color = activeColors.textBright;
+          p.opacity += (0.28 - p.opacity) * ease;
+          p.r = 1.0;
         });
       } else {
         // Act VI: Fades out completely to CTA
