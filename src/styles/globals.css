@@ -25,6 +25,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: auto; /* Lenis handles smoothing */
+  /* Smooth theme transition */
+  transition: background 0.5s var(--ease-gentle), color 0.5s var(--ease-gentle);
 }
 
 body {

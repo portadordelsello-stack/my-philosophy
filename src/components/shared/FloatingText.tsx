@@ -1,90 +1,73 @@
-// FloatingText.tsx
-// Renders ephemeral phrases that float in and out at randomized
-// positions within the container. Used in the Thoughts scene.
+// FloatingText.tsx — theme-aware
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface FloatingTextProps {
   phrases: string[];
-  visible?: boolean;
+  visible: boolean;
 }
 
-// Seeded pseudo-random positions for consistent layout
-const POSITIONS = [
-  { x: '15%',  y: '20%' },
-  { x: '65%',  y: '15%' },
-  { x: '80%',  y: '40%' },
-  { x: '10%',  y: '55%' },
-  { x: '50%',  y: '65%' },
-  { x: '78%',  y: '70%' },
-  { x: '25%',  y: '75%' },
-  { x: '40%',  y: '30%' },
-];
+interface ActivePhrase {
+  id: number;
+  text: string;
+  x: number;
+  y: number;
+  size: number;
+}
 
-export function FloatingText({ phrases, visible = true }: FloatingTextProps) {
-  const [active, setActive] = useState<Array<{ phrase: string; pos: typeof POSITIONS[number]; key: number }>>([]);
-  const keyRef = { current: 0 };
+export function FloatingText({ phrases, visible }: FloatingTextProps) {
+  const c = useThemeColors();
+  const [activeItems, setActiveItems] = useState<ActivePhrase[]>([]);
+  const [counter, setCounter] = useState(0);
 
   useEffect(() => {
-    if (!visible) { setActive([]); return; }
+    if (!visible) { setActiveItems([]); return; }
 
-    // Stagger phrase appearances
-    const timers: ReturnType<typeof setTimeout>[] = [];
+    const add = () => {
+      const text = phrases[Math.floor(Math.random() * phrases.length)];
+      const item: ActivePhrase = {
+        id: counter + Date.now(),
+        text,
+        x: 10 + Math.random() * 75,
+        y: 10 + Math.random() * 75,
+        size: 0.65 + Math.random() * 0.25,
+      };
+      setActiveItems(prev => [...prev.slice(-6), item]);
+      setCounter(p => p + 1);
+    };
 
-    phrases.forEach((phrase, i) => {
-      const pos = POSITIONS[i % POSITIONS.length];
-      const showDelay = i * 900 + 300;
-      const hideDelay = showDelay + 4200;
-
-      const showTimer = setTimeout(() => {
-        const key = ++keyRef.current;
-        setActive(prev => [...prev, { phrase, pos, key }]);
-
-        const hideTimer = setTimeout(() => {
-          setActive(prev => prev.filter(p => p.key !== key));
-        }, hideDelay - showDelay);
-        timers.push(hideTimer);
-      }, showDelay);
-
-      timers.push(showTimer);
-    });
-
-    return () => timers.forEach(t => clearTimeout(t));
+    add();
+    const interval = setInterval(add, 1400);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, phrases]);
 
   return (
-    <div
-      role="presentation"
-      style={{
-        position: 'absolute',
-        inset: 0,
-        pointerEvents: 'none',
-        overflow: 'hidden',
-      }}
-    >
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }} aria-hidden="true">
       <AnimatePresence>
-        {active.map(({ phrase, pos, key }) => (
+        {activeItems.map(item => (
           <motion.p
-            key={key}
-            initial={{ opacity: 0, y: 10 }}
+            key={item.id}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 0.45, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             style={{
               position: 'absolute',
-              left: pos.x,
-              top:  pos.y,
-              transform: 'translateX(-50%)',
+              left: `${item.x}%`,
+              top: `${item.y}%`,
+              transform: 'translate(-50%, -50%)',
               fontFamily: 'var(--font-sans)',
-              fontSize: 'clamp(0.75rem, 1.2vw, 0.9rem)',
+              fontSize: `${item.size}rem`,
               fontWeight: 300,
-              color: 'rgba(255,255,255,0.7)',
-              letterSpacing: '0.04em',
+              color: c.textSub,
+              letterSpacing: '-0.01em',
               whiteSpace: 'nowrap',
               userSelect: 'none',
             }}
           >
-            "{phrase}"
+            {item.text}
           </motion.p>
         ))}
       </AnimatePresence>

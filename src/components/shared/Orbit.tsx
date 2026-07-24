@@ -1,13 +1,12 @@
-// Orbit.tsx
-// Renders text labels orbiting around a central label.
-// Each item has its own radius and speed.
+// Orbit.tsx — theme-aware
 import { motion } from 'framer-motion';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface OrbitItem {
   label: string;
-  radius: number;     // px
-  duration: number;   // seconds per revolution
-  startAngle?: number; // degrees offset
+  radius: number;
+  duration: number;
+  startAngle: number;
 }
 
 interface OrbitProps {
@@ -17,116 +16,39 @@ interface OrbitProps {
 }
 
 export function Orbit({ center, items, size = 480 }: OrbitProps) {
+  const c = useThemeColors();
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: size,
-        height: size,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-      aria-label={`${center} surrounded by orbiting technologies`}
-    >
-      {/* Center label */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        style={{
-          position: 'absolute',
-          fontSize: 'clamp(1rem, 2vw, 1.4rem)',
-          fontWeight: 300,
-          letterSpacing: '-0.02em',
-          color: 'rgba(255,255,255,0.9)',
-          fontFamily: 'var(--font-sans)',
-          zIndex: 2,
-        }}
-      >
-        {center}
-      </motion.div>
-
-      {/* Orbit rings (decorative) */}
-      {[...new Set(items.map(i => i.radius))].map(r => (
-        <div
-          key={r}
-          style={{
-            position: 'absolute',
-            width:  r * 2,
-            height: r * 2,
-            borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.05)',
-            top:  '50%',
-            left: '50%',
-            transform: 'translate(-50%,-50%)',
-          }}
-        />
+    <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={`${center} orbit diagram`}>
+      {/* Orbit rings */}
+      {[110, 165, 210].map(r => (
+        <div key={r} style={{ position: 'absolute', width: r * 2, height: r * 2, borderRadius: '50%', border: `1px solid ${c.lineWeak}` }} />
       ))}
 
+      {/* Center label */}
+      <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+        <motion.div animate={{ boxShadow: [`0 0 0 0 ${c.lineWeak}`, `0 0 24px 8px ${c.lineMid}`, `0 0 0 0 ${c.lineWeak}`] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }} style={{ width: 14, height: 14, borderRadius: '50%', background: c.nodeActive, border: `1px solid ${c.nodeStrokeActive}` }} />
+        <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.7rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: c.textDim }}>{center}</span>
+      </div>
+
       {/* Orbiting items */}
-      {items.map((item, i) => (
+      {items.map(item => (
         <motion.div
           key={item.label}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: i * 0.15 + 0.5, duration: 1 }}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            marginTop: -12,
-            marginLeft: -12,
-            width: 24,
-            height: 24,
-          }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: item.duration, repeat: Infinity, ease: 'linear' }}
+          style={{ position: 'absolute', width: item.radius * 2, height: item.radius * 2, borderRadius: '50%', rotate: item.startAngle }}
         >
-          {/* Rotating wrapper */}
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: item.duration,
-              repeat: Infinity,
-              ease: 'linear',
-              delay: (item.startAngle ?? (i * 37)) / 360 * item.duration,
-            }}
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              marginTop: -1,
-              marginLeft: -1,
-              transformOrigin: `${item.radius}px 0`,
-              width: 2,
-              height: 2,
-            }}
-          >
-            {/* Counter-rotate the text label so it stays upright */}
+          <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem' }}>
+            <div style={{ width: 4, height: 4, borderRadius: '50%', background: c.dotDim, border: `1px solid ${c.nodeStrokeIdle}` }} />
             <motion.span
               animate={{ rotate: -360 }}
-              transition={{
-                duration: item.duration,
-                repeat: Infinity,
-                ease: 'linear',
-                delay: (item.startAngle ?? (i * 37)) / 360 * item.duration,
-              }}
-              style={{
-                position: 'absolute',
-                left: item.radius - 4,
-                top: -10,
-                whiteSpace: 'nowrap',
-                fontSize: '0.62rem',
-                fontFamily: 'var(--font-sans)',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.5)',
-                userSelect: 'none',
-              }}
+              transition={{ duration: item.duration, repeat: Infinity, ease: 'linear' }}
+              style={{ fontFamily: 'var(--font-sans)', fontSize: '0.58rem', letterSpacing: '0.1em', color: c.orbitText, whiteSpace: 'nowrap', userSelect: 'none' }}
             >
               {item.label}
             </motion.span>
-          </motion.div>
+          </div>
         </motion.div>
       ))}
     </div>
