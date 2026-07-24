@@ -12,14 +12,14 @@ interface NarrativeOverlayProps {
 const NARRATIVE = {
   es: [
     { start: 0.0, end: 0.15, text: 'Buscas herramientas. Pero las herramientas no resuelven problemas.' },
-    { start: 0.15, end: 0.35, text: 'Todo comienza con una voz humana.\nDesordenada, caótica, real.' },
+    { start: 0.29, end: 0.35, text: 'Todo comienza con una voz humana.\nDesordenada, caótica, real.' },
     { start: 0.35, end: 0.55, text: 'Entender es el acto de encontrar estructura en el ruido.' },
     { start: 0.55, end: 0.75, text: 'El código es solo el residuo visible de ese entendimiento.' },
     { start: 0.75, end: 0.90, text: 'El software aparece solo cuando su existencia se vuelve inevitable.' },
   ],
   en: [
     { start: 0.0, end: 0.15, text: 'You are searching for tools. But tools don\'t solve problems.' },
-    { start: 0.15, end: 0.35, text: 'Everything begins with a human voice.\nUnstructured, messy, real.' },
+    { start: 0.29, end: 0.35, text: 'Everything begins with a human voice.\nUnstructured, messy, real.' },
     { start: 0.35, end: 0.55, text: 'Understanding is the act of finding structure in the noise.' },
     { start: 0.55, end: 0.75, text: 'Code is only the visible residue of that understanding.' },
     { start: 0.75, end: 0.90, text: 'The software appears only when its existence becomes inevitable.' },
