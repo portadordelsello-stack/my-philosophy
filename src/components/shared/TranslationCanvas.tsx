@@ -9,6 +9,7 @@ import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 interface TranslationCanvasProps {
   progress: number;
+  isCtaHovered?: boolean;
 }
 
 interface Particle {
@@ -24,7 +25,7 @@ interface Particle {
   vy: number;
 }
 
-export function TranslationCanvas({ progress }: TranslationCanvasProps) {
+export function TranslationCanvas({ progress, isCtaHovered = false }: TranslationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const c = useThemeColors();
   const { lang } = useLang();
@@ -33,6 +34,9 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
   // Keep progress and colors updated for RAF loop
   const progressRef = useRef(progress);
   useEffect(() => { progressRef.current = progress; }, [progress]);
+
+  const isCtaHoveredRef = useRef(isCtaHovered);
+  useEffect(() => { isCtaHoveredRef.current = isCtaHovered; }, [isCtaHovered]);
 
   const colorsRef = useRef(c);
   useEffect(() => { colorsRef.current = c; }, [c]);
@@ -515,9 +519,25 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           p.r = 1.0;
         });
       } else {
-        // Act VI: Fades out completely to CTA
-        particles.forEach((p) => {
-          p.opacity += (0 - p.opacity) * ease;
+        // Act VI: Fades out completely to CTA (particles react to hover)
+        const isHovered = isCtaHoveredRef.current;
+        
+        particles.forEach((p, i) => {
+          const angle = i * 2.4 + time * (isHovered ? 2.5 : 0.2); // rotates fast on hover
+          const radius = isHovered ? (60 + (i % 5) * 10) : (180 + (i % 8) * 15);
+          
+          // Orbit center: (0, 45) if hovered (around the button), (0, 0) if not
+          const cx = 0;
+          const cy = isHovered ? 45 : 0;
+          
+          const tx = cx + Math.cos(angle) * radius;
+          const ty = cy + Math.sin(angle) * radius;
+          const targetOpacity = isHovered ? 0.60 : 0.05;
+
+          p.x += (tx - p.x) * ease;
+          p.y += (ty - p.y) * ease;
+          p.opacity += (targetOpacity - p.opacity) * ease;
+          p.r = isHovered ? 1.5 : 1.0;
         });
       }
 

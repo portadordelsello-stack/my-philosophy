@@ -14,6 +14,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function Home() {
   const [progress, setProgress] = useState(0);
+  const [isCtaHovered, setIsCtaHovered] = useState(false);
   const scrollTrackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -59,8 +60,8 @@ export function Home() {
           pointerEvents: 'none',
         }}
       >
-        <TranslationCanvas progress={progress} />
-        <NarrativeOverlay progress={progress} />
+        <TranslationCanvas progress={progress} isCtaHovered={isCtaHovered} />
+        <NarrativeOverlay progress={progress} onCtaHoverChange={setIsCtaHovered} />
         {/* Mount controls inside the fixed viewport */}
         <Controls progress={progress} />
       </div>

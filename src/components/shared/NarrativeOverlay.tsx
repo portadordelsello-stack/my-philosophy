@@ -7,6 +7,7 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface NarrativeOverlayProps {
   progress: number;
+  onCtaHoverChange?: (hovered: boolean) => void;
 }
 
 const NARRATIVE = {
@@ -26,7 +27,7 @@ const NARRATIVE = {
   ],
 };
 
-export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
+export function NarrativeOverlay({ progress, onCtaHoverChange }: NarrativeOverlayProps) {
   const { lang } = useLang();
   const c = useThemeColors();
 
@@ -40,10 +41,10 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
     : 'If you want someone who only writes code, look elsewhere.';
   
   const ctaSub = lang === 'es' 
-    ? 'Si buscas a alguien que traduzca la realidad en valor:' 
-    : 'If you want someone who translates reality into value:';
+    ? 'Si buscas a alguien que traduzca la realidad en valor.' 
+    : 'If you want someone who translates reality into value.';
 
-  const ctaButton = lang === 'es' ? 'Iniciar la conversación.' : 'Begin the conversation.';
+  const ctaButton = lang === 'es' ? 'Comencemos.' : "Let's build.";
 
   return (
     <div
@@ -102,81 +103,89 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
         )}
       </AnimatePresence>
 
-      {/* ── Act VI: Premium Recruiter CTA Invitation ── */}
+      {/* ── Act VI: Premium Recruiter CTA Invitation (Staggered Cinematic Timeline) ── */}
       <AnimatePresence>
         {isFinal && (
           <motion.div
-            initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -20, filter: 'blur(8px)' }}
-            transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '1.2rem',
+              justifyContent: 'center',
               textAlign: 'center',
               maxWidth: '680px',
+              gap: '1.5rem',
             }}
           >
-            <p
+            {/* The gray phrase fades in, then fades out slowly */}
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: [0, 0.45, 0.45, 0] }}
+              transition={{ times: [0, 0.15, 0.75, 1], duration: 5.5, ease: 'easeInOut' }}
               style={{
                 fontFamily: 'var(--font-sans)',
                 fontWeight: 300,
-                fontSize: 'clamp(1.55rem, 4.2vw, 2.35rem)', // Increased 30% from clamp(1.2rem, 3.2vw, 1.8rem)
+                fontSize: 'clamp(1.2rem, 3.2vw, 1.8rem)',
                 letterSpacing: '-0.02em',
                 color: c.textSecondary,
-                lineHeight: 1.3,
+                lineHeight: 1.35,
+                maxWidth: '600px',
+                position: 'absolute',
+                top: '38%',
               }}
             >
               {ctaTitle}
-            </p>
-            <p
+            </motion.p>
+            
+            {/* The main subtitle fades in and remains visible */}
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.5, duration: 2.0, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 fontFamily: 'var(--font-sans)',
-                fontWeight: 400,
-                fontSize: 'clamp(1.4rem, 4vw, 2.2rem)',
-                letterSpacing: '-0.03em',
+                fontWeight: 300,
+                fontSize: 'clamp(1.55rem, 4.2vw, 2.35rem)',
+                letterSpacing: '-0.02em',
                 color: c.textPrimary,
-                lineHeight: 1.25,
-                marginBottom: '1.5rem',
+                lineHeight: 1.35,
+                maxWidth: '680px',
               }}
             >
               {ctaSub}
-            </p>
+            </motion.p>
 
-            <button
+            {/* The borderless, pill-less button fades in after silence */}
+            <motion.button
               onClick={() => {
                 window.location.href = 'mailto:hello@philosophy-site.com';
               }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 5.5, duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
+              onMouseEnter={() => onCtaHoverChange?.(true)}
+              onMouseLeave={() => onCtaHoverChange?.(false)}
               style={{
                 background: 'none',
-                border: `1px solid ${c.borderMid}`,
-                borderRadius: '24px',
-                padding: '0.75rem 2.2rem',
-                color: c.textPrimary,
+                border: 'none',
+                padding: '1.2rem 2.5rem',
+                color: c.textSecondary,
                 fontFamily: 'var(--font-sans)',
-                fontSize: '0.85rem',
-                fontWeight: 500,
-                letterSpacing: '0.04em',
+                fontSize: 'clamp(1.2rem, 3.2vw, 1.7rem)',
+                fontWeight: 400,
+                letterSpacing: '-0.01em',
                 cursor: 'pointer',
-                transition: 'border-color 0.4s ease, color 0.4s ease, background-color 0.4s ease',
                 outline: 'none',
                 pointerEvents: 'auto',
+                transition: 'color 0.4s ease, transform 0.4s ease',
               }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget;
-                el.style.borderColor = c.textPrimary;
-                el.style.backgroundColor = c.nodeIdle;
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget;
-                el.style.borderColor = c.borderMid;
-                el.style.backgroundColor = 'transparent';
-              }}
+              whileHover={{ scale: 1.05, color: c.textBright }}
             >
               {ctaButton}
-            </button>
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
