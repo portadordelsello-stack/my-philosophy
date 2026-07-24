@@ -159,39 +159,43 @@ export function TranslationCanvas({ progress }: TranslationCanvasProps) {
           p.opacity += (0.08 - p.opacity) * ease;
         });
       } else if (actProgress >= 0.15 && actProgress < 0.35) {
-        // Act II: Messy customer quotes float sequentially
-        let activeQuote = '';
-        let showQuote = false;
-        let targetY = 0;
+        // Act II: Messy customer quotes float and accumulate sequentially
+        const showQuote1 = actProgress >= 0.15 && actProgress < 0.35;
+        const showQuote2 = actProgress >= 0.23 && actProgress < 0.35;
 
-        if (actProgress >= 0.15 && actProgress < 0.20) {
-          activeQuote = lang === 'es' ? 'La adopción nunca ocurrió.' : 'Adoption never happened.';
-          showQuote = true;
-          targetY = 0;
-        } else if (actProgress >= 0.23 && actProgress < 0.29) {
-          activeQuote = lang === 'es' ? 'El software cambió. Los hábitos no.' : "The software changed. The habits didn't.";
-          showQuote = true;
-          targetY = 0;
+        ctx.font = '400 19px "Inter", sans-serif';
+        ctx.fillStyle = activeColors.textSecondary;
+        ctx.textAlign = 'center';
+
+        if (showQuote1) {
+          const q1 = lang === 'es' ? 'La adopción nunca ocurrió.' : 'Adoption never happened.';
+          const drift1 = Math.sin(time) * 6;
+          ctx.fillText(q1, 0, -30 + drift1);
         }
 
-        if (showQuote) {
-          ctx.font = '400 19px "Inter", sans-serif';
-          ctx.fillStyle = activeColors.textSecondary;
-          ctx.textAlign = 'center';
-          const drift = Math.sin(time) * 6;
-          ctx.fillText(activeQuote, 0, targetY + drift);
+        if (showQuote2) {
+          const q2 = lang === 'es' ? 'El software cambió. Los hábitos no.' : "The software changed. The habits didn't.";
+          const drift2 = Math.sin(time + 1) * 6;
+          ctx.fillText(q2, 0, 30 + drift2);
         }
 
-        // Particles gather around the active text, or cluster in the center during silence/narrative
+        // Particles gather dynamically around active quotes
         particles.forEach((p, i) => {
           const angle = i * 2.4;
           let tx = 0;
           let ty = 0;
           let targetOpacity = 0.08;
 
-          if (showQuote) {
+          if (showQuote2) {
+            // Split particles between the two active quotes
+            const targetY = (i % 2 === 0) ? -30 : 30;
             tx = Math.cos(angle) * 180 + (Math.sin(time + i) * 12);
             ty = targetY + (Math.cos(time + i) * 6);
+            targetOpacity = 0.16;
+          } else if (showQuote1) {
+            // Gather all particles around the first quote
+            tx = Math.cos(angle) * 180 + (Math.sin(time + i) * 12);
+            ty = -30 + (Math.cos(time + i) * 6);
             targetOpacity = 0.16;
           } else {
             tx = Math.cos(angle) * 110 + (Math.sin(time + i) * 8);
