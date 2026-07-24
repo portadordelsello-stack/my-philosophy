@@ -161,7 +161,7 @@ export function NarrativeOverlay({ progress, onCtaHoverChange }: NarrativeOverla
             {/* The borderless, pill-less button fades in after silence */}
             <motion.button
               onClick={() => {
-                window.location.href = 'mailto:hello@philosophy-site.com';
+                window.location.href = 'mailto:juanpacheco@playcode.com.ar';
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
