@@ -93,29 +93,95 @@ export function TranslationCanvas({ progress, isCtaHovered = false }: Translatio
       ctx.fillStyle = activeColors.bg;
       ctx.fillRect(0, 0, width, height);
 
+      // ── Grid Evolution Timeline ──
+      let gridOpacity = 0;
+      let gridSize = 80;
+      let drawSubGrid = false;
+      let subGridOpacity = 0;
+
+      if (actProgress < 0.15) {
+        gridOpacity = 0;
+      } else if (actProgress >= 0.15 && actProgress < 0.35) {
+        const localProg = (actProgress - 0.15) / 0.20;
+        gridOpacity = localProg * 0.50; 
+        gridSize = 80 - localProg * 20; 
+      } else if (actProgress >= 0.35 && actProgress < 0.55) {
+        const localProg = (actProgress - 0.35) / 0.20;
+        gridOpacity = 0.50 + localProg * 0.35; 
+        gridSize = 60 - localProg * 10; 
+      } else if (actProgress >= 0.55 && actProgress < 0.90) {
+        gridOpacity = 0.85;
+        gridSize = 50;
+        const localProg = (actProgress - 0.55) / 0.20; 
+        drawSubGrid = true;
+        subGridOpacity = Math.max(0, Math.min(0.40, localProg * 0.40));
+      } else {
+        const localProg = Math.max(0, Math.min(1, (actProgress - 0.90) / 0.10));
+        gridOpacity = 0.85 * (1 - localProg);
+        subGridOpacity = 0.40 * (1 - localProg);
+        gridSize = 50;
+        drawSubGrid = true;
+      }
+
       // ── Draw background blueprint grid ──
-      ctx.save();
-      ctx.strokeStyle = activeColors.lineWeak;
-      ctx.lineWidth = 0.5;
+      if (gridOpacity > 0.01) {
+        ctx.save();
+        
+        // Grid breathing pulse in Act IV and V (synced with the system core)
+        const pulse = (actProgress >= 0.55 && actProgress < 0.90) 
+          ? (0.85 + Math.sin(time * 3.5) * 0.12)
+          : 1.0;
+          
+        ctx.strokeStyle = activeColors.lineWeak;
+        ctx.lineWidth = 0.5;
+        
+        // Scroll offset + active flow in Act V
+        const autoDrift = (actProgress >= 0.75 && actProgress < 0.90) ? time * 15 : 0;
+        const scrollOffset = actProgress * 150 + autoDrift;
 
-      const gridSize = 50;
-      // Parallax grid scroll based on progress
-      const scrollOffset = actProgress * 150;
+        // Primary Grid lines
+        ctx.globalAlpha = gridOpacity * pulse;
+        for (let x = -gridSize; x < width + gridSize; x += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+        for (let y = -gridSize; y < height + gridSize; y += gridSize) {
+          const offset = (y + scrollOffset) % height;
+          ctx.beginPath();
+          ctx.moveTo(0, offset);
+          ctx.lineTo(width, offset);
+          ctx.stroke();
+        }
 
-      for (let x = -gridSize; x < width + gridSize; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
+        // Sub Grid lines (2x resolution - 25px)
+        if (drawSubGrid && subGridOpacity > 0.01) {
+          ctx.globalAlpha = subGridOpacity * pulse;
+          ctx.strokeStyle = activeColors.lineWeak;
+          ctx.lineWidth = 0.25;
+          const subSize = gridSize / 2;
+          
+          for (let x = -subSize; x < width + subSize; x += subSize) {
+            if (Math.round(x / subSize) % 2 !== 0) {
+              ctx.beginPath();
+              ctx.moveTo(x, 0);
+              ctx.lineTo(x, height);
+              ctx.stroke();
+            }
+          }
+          for (let y = -subSize; y < height + subSize; y += subSize) {
+            const offset = (y + scrollOffset) % height;
+            if (Math.round(y / subSize) % 2 !== 0) {
+              ctx.beginPath();
+              ctx.moveTo(0, offset);
+              ctx.lineTo(width, offset);
+              ctx.stroke();
+            }
+          }
+        }
+        ctx.restore();
       }
-      for (let y = -gridSize; y < height + gridSize; y += gridSize) {
-        const offset = (y + scrollOffset) % height;
-        ctx.beginPath();
-        ctx.moveTo(0, offset);
-        ctx.lineTo(width, offset);
-        ctx.stroke();
-      }
-      ctx.restore();
 
       // Translate coordinates to screen center for visual components
       ctx.save();
