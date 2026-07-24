@@ -498,44 +498,47 @@ export function TranslationCanvas({ progress, isCtaHovered = false }: Translatio
           p.r = 1.0;
         });
       } else if (actProgress >= 0.75 && actProgress < 0.90) {
-        // Act V: System Engine (Abstract data pipeline, non-SaaS)
+        // Act V: System Engine (Abstract data pipeline, scaled +25% larger)
         ctx.strokeStyle = activeColors.line;
         ctx.lineWidth = 0.5;
         
+        const innerR = 75;   // 60 * 1.25 (+25%)
+        const outerR = 137.5; // 110 * 1.25 (+25%)
+
         // Inner blueprint ring
         ctx.beginPath();
-        ctx.arc(0, 0, 60, 0, Math.PI * 2);
+        ctx.arc(0, 0, innerR, 0, Math.PI * 2);
         ctx.stroke();
 
         // Outer blueprint ring
         ctx.beginPath();
-        ctx.arc(0, 0, 110, 0, Math.PI * 2);
+        ctx.arc(0, 0, outerR, 0, Math.PI * 2);
         ctx.stroke();
 
         // Pulsing central system core
-        const corePulse = 6 + Math.sin(time * 3.5) * 1.8;
+        const corePulse = 7.5 + Math.sin(time * 3.5) * 2.25;
         ctx.beginPath();
         ctx.arc(0, 0, corePulse, 0, Math.PI * 2);
         ctx.fillStyle = activeColors.textPrimary;
         ctx.fill();
 
-        ctx.font = '7px "JetBrains Mono", monospace';
+        ctx.font = '8px "JetBrains Mono", monospace';
         ctx.fillStyle = activeColors.textSecondary;
         ctx.textAlign = 'center';
-        ctx.fillText('system_core', 0, 15);
+        ctx.fillText('system_core', 0, 18);
 
         // Calculate orbital node coordinates
-        const n1x = Math.cos(time * 0.5) * 60;
-        const n1y = Math.sin(time * 0.5) * 60;
+        const n1x = Math.cos(time * 0.5) * innerR;
+        const n1y = Math.sin(time * 0.5) * innerR;
 
-        const n2x = Math.cos(time * 0.5 + Math.PI) * 60;
-        const n2y = Math.sin(time * 0.5 + Math.PI) * 60;
+        const n2x = Math.cos(time * 0.5 + Math.PI) * innerR;
+        const n2y = Math.sin(time * 0.5 + Math.PI) * innerR;
 
-        const n3x = Math.cos(-time * 0.25) * 110;
-        const n3y = Math.sin(-time * 0.25) * 110;
+        const n3x = Math.cos(-time * 0.25) * outerR;
+        const n3y = Math.sin(-time * 0.25) * outerR;
 
-        const n4x = Math.cos(-time * 0.25 + Math.PI) * 110;
-        const n4y = Math.sin(-time * 0.25 + Math.PI) * 110;
+        const n4x = Math.cos(-time * 0.25 + Math.PI) * outerR;
+        const n4y = Math.sin(-time * 0.25 + Math.PI) * outerR;
 
         // Dotted connection lines between core and nodes
         ctx.save();
@@ -560,20 +563,20 @@ export function TranslationCanvas({ progress, isCtaHovered = false }: Translatio
 
         nodes.forEach(([nx, ny, label]) => {
           ctx.beginPath();
-          ctx.arc(nx as number, ny as number, 3, 0, Math.PI * 2);
+          ctx.arc(nx as number, ny as number, 3.5, 0, Math.PI * 2);
           ctx.fillStyle = activeColors.textPrimary;
           ctx.fill();
 
-          ctx.font = '7px "JetBrains Mono", monospace';
+          ctx.font = '8px "JetBrains Mono", monospace';
           ctx.fillStyle = activeColors.textSecondary;
           ctx.textAlign = 'left';
-          ctx.fillText(label as string, (nx as number) + 6, (ny as number) + 2);
+          ctx.fillText(label as string, (nx as number) + 7, (ny as number) + 2);
         });
 
-        // Particles flow dynamically along inner and outer orbits
+        // Particles flow dynamically along inner and outer orbits (+25% scaled radius)
         particles.forEach((p, i) => {
           const orbitIdx = i % 2;
-          const radius = orbitIdx === 0 ? 60 : 110;
+          const radius = orbitIdx === 0 ? innerR : outerR;
           const speedFactor = orbitIdx === 0 ? 0.5 : -0.25;
           const offsetAngle = (i * 12) % 360;
 
@@ -584,7 +587,7 @@ export function TranslationCanvas({ progress, isCtaHovered = false }: Translatio
           p.x += (tx - p.x) * ease;
           p.y += (ty - p.y) * ease;
           p.opacity += (0.28 - p.opacity) * ease;
-          p.r = 1.0;
+          p.r = 1.2;
         });
       } else {
         // Act VI: Fades out completely to CTA (particles react to hover)
