@@ -1,14 +1,14 @@
 // Home.tsx
-// Home composition layer for V3.0 "THE BECOMING" interactive film.
+// Home composition layer for V3.1 "THE TRANSLATION PROTOCOL".
 // Establishes a single 950vh scroll height track, maps scroll progress to 0% -> 100%,
-// hides the hardware cursor during the film, and mounts FilmCanvas, NarrativeOverlay, and Controls.
+// hides the hardware cursor during the film, and mounts TranslationCanvas, NarrativeOverlay, and Controls.
 import { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import { FilmCanvas }       from '../components/shared/FilmCanvas';
-import { NarrativeOverlay } from '../components/shared/NarrativeOverlay';
-import { Controls }         from '../components/shared/Controls';
+import { TranslationCanvas } from '../components/shared/TranslationCanvas';
+import { NarrativeOverlay }   from '../components/shared/NarrativeOverlay';
+import { Controls }           from '../components/shared/Controls';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,7 +36,7 @@ export function Home() {
   }, []);
 
   // Hide hardware cursor during film to enforce cinematic immersion
-  const showCursor = progress >= 0.96;
+  const showCursor = progress >= 0.90;
 
   return (
     <div
@@ -59,7 +59,7 @@ export function Home() {
           pointerEvents: 'none',
         }}
       >
-        <FilmCanvas progress={progress} />
+        <TranslationCanvas progress={progress} />
         <NarrativeOverlay progress={progress} />
         {/* Mount controls inside the fixed viewport */}
         <Controls progress={progress} />

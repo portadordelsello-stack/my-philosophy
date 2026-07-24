@@ -1,5 +1,5 @@
 // NarrativeOverlay.tsx
-// Overlay that displays minimal, high-end narrative statements at exact scroll percentages.
+// Overlay that displays the Recruiter Translation Protocol narrative statements at precise scroll percentages.
 // Enforces the strict under-120-word limit and handles language selection.
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang } from '../../contexts/LanguageContext';
@@ -11,36 +11,20 @@ interface NarrativeOverlayProps {
 
 const NARRATIVE = {
   es: [
-    { start: 0.06, end: 0.14, text: 'Todo comienza sin forma.' },
-    { start: 0.14, end: 0.26, text: 'Toda idea llega como ruido.' },
-    { start: 0.26, end: 0.38, text: 'El entendimiento comienza con las relaciones.' },
-    { start: 0.38, end: 0.50, text: 'La claridad crea gravedad.' },
-    { start: 0.50, end: 0.64, text: 'La arquitectura es entendimiento congelado.' },
-    { start: 0.64, end: 0.78, text: 'El código es solo el residuo visible del entendimiento.' },
-    { start: 0.78, end: 0.90, text: 'Un producto es una estructura que aprendió a servir.' },
-    { start: 0.90, end: 0.96, text: 'El software nunca fue el principio.\nFue la consecuencia.' },
+    { start: 0.0, end: 0.15, text: 'Buscas herramientas. Pero las herramientas no resuelven problemas.' },
+    { start: 0.15, end: 0.35, text: 'Todo comienza con una voz humana.\nDesordenada, caótica, real.' },
+    { start: 0.35, end: 0.55, text: 'Entender es el acto de encontrar estructura en el ruido.' },
+    { start: 0.55, end: 0.75, text: 'El código es solo el residuo visible de ese entendimiento.' },
+    { start: 0.75, end: 0.90, text: 'El software aparece solo cuando su existencia se vuelve inevitable.' },
   ],
   en: [
-    { start: 0.06, end: 0.14, text: 'Everything begins without form.' },
-    { start: 0.14, end: 0.26, text: 'Every idea arrives as noise.' },
-    { start: 0.26, end: 0.38, text: 'Understanding begins with relationships.' },
-    { start: 0.38, end: 0.50, text: 'Clarity creates gravity.' },
-    { start: 0.50, end: 0.64, text: 'Architecture is frozen understanding.' },
-    { start: 0.64, end: 0.78, text: 'Code is only the visible residue of understanding.' },
-    { start: 0.78, end: 0.90, text: 'A product is a structure that learned how to serve.' },
-    { start: 0.90, end: 0.96, text: 'The software was never the beginning.\nIt was the consequence.' },
+    { start: 0.0, end: 0.15, text: 'You are searching for tools. But tools don\'t solve problems.' },
+    { start: 0.15, end: 0.35, text: 'Everything begins with a human voice.\nUnstructured, messy, real.' },
+    { start: 0.35, end: 0.55, text: 'Understanding is the act of finding structure in the noise.' },
+    { start: 0.55, end: 0.75, text: 'Code is only the visible residue of that understanding.' },
+    { start: 0.75, end: 0.90, text: 'The software appears only when its existence becomes inevitable.' },
   ],
 };
-
-const CHAOS_WORDS = [
-  { text: 'payments', x: '18%', y: '25%', delay: 0.1 },
-  { text: 'users', x: '78%', y: '30%', delay: 0.3 },
-  { text: 'dashboard', x: '15%', y: '70%', delay: 0.2 },
-  { text: 'reports', x: '82%', y: '68%', delay: 0.5 },
-  { text: 'mobile', x: '48%', y: '18%', delay: 0.4 },
-  { text: 'automation', x: '25%', y: '50%', delay: 0.6 },
-  { text: 'integrations', x: '70%', y: '50%', delay: 0.7 },
-];
 
 export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
   const { lang } = useLang();
@@ -49,11 +33,17 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
   const lines = NARRATIVE[lang];
   const activeLine = lines.find((line) => progress >= line.start && progress < line.end);
 
-  const isChaos = progress >= 0.14 && progress < 0.26;
-  const isFinal = progress >= 0.96;
+  const isFinal = progress >= 0.90;
 
-  const ctaTitle = lang === 'es' ? '¿En qué podría convertirse tu idea?' : 'What could your idea become?';
-  const ctaButton = lang === 'es' ? 'Comienza la siguiente transformación.' : 'Begin the next transformation.';
+  const ctaTitle = lang === 'es' 
+    ? 'Si buscas a alguien que solo escriba código, busca en otro lado.' 
+    : 'If you want someone who only writes code, look elsewhere.';
+  
+  const ctaSub = lang === 'es' 
+    ? 'Si buscas a alguien que traduzca la realidad en valor:' 
+    : 'If you want someone who translates reality into value:';
+
+  const ctaButton = lang === 'es' ? 'Iniciar la conversación.' : 'Begin the conversation.';
 
   return (
     <div
@@ -65,7 +55,7 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        pointerEvents: isFinal ? 'auto' : 'none', // click passes through unless CTA
+        pointerEvents: isFinal ? 'auto' : 'none',
         zIndex: 5,
         boxSizing: 'border-box',
         padding: '0 2rem',
@@ -83,7 +73,7 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
             style={{
               fontFamily: 'var(--font-sans)',
               fontWeight: 300,
-              fontSize: 'clamp(1.4rem, 4.5vw, 2.2rem)',
+              fontSize: 'clamp(1.4rem, 4vw, 2.1rem)',
               letterSpacing: '-0.02em',
               color: c.textPrimary,
               textAlign: 'center',
@@ -97,40 +87,7 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
         )}
       </AnimatePresence>
 
-      {/* ── Act III: Floating dissolving words ── */}
-      <AnimatePresence>
-        {isChaos && (
-          <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-            {CHAOS_WORDS.map((w) => (
-              <motion.span
-                key={w.text}
-                initial={{ opacity: 0, scale: 0.85, filter: 'blur(6px)' }}
-                animate={{ opacity: [0, 0.35, 0], scale: [0.9, 1.05, 1], filter: ['blur(4px)', 'blur(0px)', 'blur(6px)'] }}
-                transition={{
-                  duration: 2.2,
-                  repeat: Infinity,
-                  delay: w.delay,
-                  ease: 'easeInOut',
-                }}
-                style={{
-                  position: 'absolute',
-                  left: w.x,
-                  top: w.y,
-                  transform: 'translate(-50%, -50%)',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 'clamp(0.7rem, 1.8vw, 0.95rem)',
-                  color: c.textMuted,
-                  letterSpacing: '0.04em',
-                }}
-              >
-                {w.text}
-              </motion.span>
-            ))}
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Act X: Premium CTA Invitation ── */}
+      {/* ── Act VI: Premium Recruiter CTA Invitation ── */}
       <AnimatePresence>
         {isFinal && (
           <motion.div
@@ -142,21 +99,35 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '2.5rem',
+              gap: '1.2rem',
               textAlign: 'center',
+              maxWidth: '680px',
             }}
           >
             <p
               style={{
                 fontFamily: 'var(--font-sans)',
                 fontWeight: 300,
-                fontSize: 'clamp(1.6rem, 5vw, 2.5rem)',
-                letterSpacing: '-0.03em',
-                color: c.textPrimary,
-                lineHeight: 1.25,
+                fontSize: 'clamp(1.2rem, 3.2vw, 1.8rem)',
+                letterSpacing: '-0.02em',
+                color: c.textSecondary,
+                lineHeight: 1.3,
               }}
             >
               {ctaTitle}
+            </p>
+            <p
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontWeight: 400,
+                fontSize: 'clamp(1.4rem, 4vw, 2.2rem)',
+                letterSpacing: '-0.03em',
+                color: c.textPrimary,
+                lineHeight: 1.25,
+                marginBottom: '1.5rem',
+              }}
+            >
+              {ctaSub}
             </p>
 
             <button
@@ -167,11 +138,11 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
                 background: 'none',
                 border: `1px solid ${c.borderMid}`,
                 borderRadius: '24px',
-                padding: '0.75rem 2rem',
-                color: c.textSecondary,
+                padding: '0.75rem 2.2rem',
+                color: c.textPrimary,
                 fontFamily: 'var(--font-sans)',
                 fontSize: '0.85rem',
-                fontWeight: 400,
+                fontWeight: 500,
                 letterSpacing: '0.04em',
                 cursor: 'pointer',
                 transition: 'border-color 0.4s ease, color 0.4s ease, background-color 0.4s ease',
@@ -181,13 +152,11 @@ export function NarrativeOverlay({ progress }: NarrativeOverlayProps) {
               onMouseEnter={(e) => {
                 const el = e.currentTarget;
                 el.style.borderColor = c.textPrimary;
-                el.style.color = c.textPrimary;
                 el.style.backgroundColor = c.nodeIdle;
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget;
                 el.style.borderColor = c.borderMid;
-                el.style.color = c.textSecondary;
                 el.style.backgroundColor = 'transparent';
               }}
             >

@@ -1,0 +1,365 @@
+// TranslationCanvas.tsx
+// Background coordinate grid and particle engine. Handles the morphing
+// of text/search states, raw customer quotes, database boxes, code functions,
+// and dashboard widgets based on scroll progress.
+import { useEffect, useRef } from 'react';
+import { useThemeColors } from '../../hooks/useThemeColors';
+import { useLang } from '../../contexts/LanguageContext';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
+
+interface TranslationCanvasProps {
+  progress: number;
+}
+
+interface Particle {
+  // Current values
+  x: number;
+  y: number;
+  r: number;
+  opacity: number;
+  color: string;
+
+  // Easing velocities
+  vx: number;
+  vy: number;
+}
+
+export function TranslationCanvas({ progress }: TranslationCanvasProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const c = useThemeColors();
+  const { lang } = useLang();
+  const reducedMotion = useReducedMotion();
+
+  // Keep progress and colors updated for RAF loop
+  const progressRef = useRef(progress);
+  useEffect(() => { progressRef.current = progress; }, [progress]);
+
+  const colorsRef = useRef(c);
+  useEffect(() => { colorsRef.current = c; }, [c]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    // Coordinate pool
+    const PARTICLE_COUNT = 150;
+    const particles: Particle[] = [];
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push({
+        x: (Math.random() - 0.5) * width,
+        y: (Math.random() - 0.5) * height,
+        r: 1.5,
+        opacity: 0,
+        color: c.textSecondary,
+        vx: 0,
+        vy: 0,
+      });
+    }
+
+    const handleResize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    let animationFrameId = 0;
+    let time = 0;
+
+    const tick = () => {
+      time += 0.02;
+      const actProgress = progressRef.current;
+      const activeColors = colorsRef.current;
+
+      // ── Clean canvas ──
+      ctx.fillStyle = activeColors.bg;
+      ctx.fillRect(0, 0, width, height);
+
+      // ── Draw background blueprint grid ──
+      ctx.save();
+      ctx.strokeStyle = activeColors.lineWeak;
+      ctx.lineWidth = 0.5;
+
+      const gridSize = 50;
+      // Parallax grid scroll based on progress
+      const scrollOffset = actProgress * 150;
+
+      for (let x = -gridSize; x < width + gridSize; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = -gridSize; y < height + gridSize; y += gridSize) {
+        const offset = (y + scrollOffset) % height;
+        ctx.beginPath();
+        ctx.moveTo(0, offset);
+        ctx.lineTo(width, offset);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Translate coordinates to screen center for visual components
+      ctx.save();
+      ctx.translate(width / 2, height / 2);
+
+      // ── Render States ──
+      const ease = reducedMotion ? 1.0 : 0.08;
+
+      if (actProgress < 0.15) {
+        // Act I: Search query React Developer
+        const term = '> SEARCH: REACT DEVELOPER / FULLSTACK';
+        const crossLength = Math.max(0, (actProgress - 0.07) / 0.08); // cross out triggers at 7%
+
+        ctx.font = '13px var(--font-mono)';
+        ctx.fillStyle = activeColors.textSecondary;
+        ctx.textAlign = 'center';
+        ctx.fillText(term, 0, 0);
+
+        if (crossLength > 0) {
+          ctx.beginPath();
+          ctx.moveTo(-150, -4);
+          ctx.lineTo(-150 + 300 * Math.min(1, crossLength), -4);
+          ctx.strokeStyle = '#ff6464';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+
+        // Keep particles faint and floating
+        particles.forEach((p, i) => {
+          const angle = (i * 13) % 360;
+          p.x += (Math.cos(angle) * 120 - p.x) * ease;
+          p.y += (Math.sin(angle) * 120 - p.y) * ease;
+          p.opacity += (0.08 - p.opacity) * ease;
+        });
+      } else if (actProgress >= 0.15 && actProgress < 0.35) {
+        // Act II: Messy customer quotes float
+        const quotes = lang === 'es' ? [
+          '“Perdemos reportes en papel cada semana”',
+          '“Los técnicos olvidan diagnosticar el equipo”',
+          '“Clientes llaman a diario buscando actualizaciones”',
+        ] : [
+          '“We lose paper reports every week”',
+          '“Technicians forget to diagnose equipment”',
+          '“Customers call daily looking for updates”',
+        ];
+
+        ctx.font = '300 12px var(--font-sans)';
+        ctx.fillStyle = activeColors.textMuted;
+        ctx.textAlign = 'center';
+
+        quotes.forEach((q, idx) => {
+          const drift = Math.sin(time + idx) * 8;
+          ctx.fillText(q, 0, -40 + idx * 40 + drift);
+        });
+
+        // Particles gather around text areas
+        particles.forEach((p, i) => {
+          const qIdx = i % 3;
+          const angle = i * 2.4;
+          const tx = Math.cos(angle) * 180 + (Math.sin(time + i) * 12);
+          const ty = -40 + qIdx * 40 + (Math.cos(time + i) * 6);
+          p.x += (tx - p.x) * ease;
+          p.y += (ty - p.y) * ease;
+          p.opacity += (0.16 - p.opacity) * ease;
+        });
+      } else if (actProgress >= 0.35 && actProgress < 0.55) {
+        // Act III: Blueprint / Database boxes
+        // Draw 3 schematic boxes
+        const boxLabels = ['EQUIPMENT', 'DIAGNOSIS', 'TICKET'];
+        const boxX = [-140, 0, 140];
+        const boxY = -30;
+        const boxW = 100;
+        const boxH = 60;
+
+        ctx.strokeStyle = activeColors.lineStrong;
+        ctx.lineWidth = 1;
+        ctx.fillStyle = activeColors.nodeIdle;
+
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.rect(boxX[i] - boxW / 2, boxY - boxH / 2, boxW, boxH);
+          ctx.fill();
+          ctx.stroke();
+
+          // Title
+          ctx.font = '8px var(--font-sans)';
+          ctx.fillStyle = activeColors.textPrimary;
+          ctx.textAlign = 'center';
+          ctx.fillText(boxLabels[i], boxX[i], boxY - 12);
+
+          // Lines
+          ctx.font = '6px var(--font-mono)';
+          ctx.fillStyle = activeColors.textSecondary;
+          ctx.fillText('id: UUID', boxX[i], boxY + 2);
+          ctx.fillText('status: STR', boxX[i], boxY + 12);
+        }
+
+        // Draw connections between boxes
+        ctx.beginPath();
+        ctx.moveTo(boxX[0] + boxW / 2, boxY);
+        ctx.lineTo(boxX[1] - boxW / 2, boxY);
+        ctx.moveTo(boxX[1] + boxW / 2, boxY);
+        ctx.lineTo(boxX[2] - boxW / 2, boxY);
+        ctx.strokeStyle = activeColors.lineStrong;
+        ctx.stroke();
+
+        // Particles snap to borders of the boxes
+        particles.forEach((p, i) => {
+          const boxIdx = i % 3;
+          const edge = i % 4;
+          const localOffset = ((i * 17) % 50) - 25;
+
+          let tx = boxX[boxIdx];
+          let ty = boxY;
+
+          if (edge === 0) { tx += localOffset; ty -= boxH / 2; }
+          if (edge === 1) { tx += localOffset; ty += boxH / 2; }
+          if (edge === 2) { tx -= boxW / 2; ty += localOffset; }
+          if (edge === 3) { tx += boxW / 2; ty += localOffset; }
+
+          p.x += (tx - p.x) * ease;
+          p.y += (ty - p.y) * ease;
+          p.opacity += (0.45 - p.opacity) * ease;
+          p.r = 1.0;
+        });
+      } else if (actProgress >= 0.55 && actProgress < 0.75) {
+        // Act IV: Monospace Code Block
+        const codeLines = [
+          'function syncDiagnostics(equipment) {',
+          '  return db.tickets',
+          '    .filter(t => t.id === equipment.id)',
+          '    .map(t => t.status);',
+          '}',
+        ];
+
+        ctx.font = '10px var(--font-mono)';
+        ctx.fillStyle = activeColors.monoCode;
+        ctx.textAlign = 'left';
+
+        codeLines.forEach((line, idx) => {
+          ctx.fillText(line, -160, -40 + idx * 18);
+        });
+
+        // Particles line up next to characters
+        particles.forEach((p, i) => {
+          const lineIdx = i % 5;
+          const charIdx = (i * 3) % codeLines[lineIdx].length;
+          const tx = -160 + charIdx * 6;
+          const ty = -36 + lineIdx * 18;
+
+          p.x += (tx - p.x) * ease;
+          p.y += (ty - p.y) * ease;
+          p.opacity += (0.5 - p.opacity) * ease;
+          p.r = 1.2;
+        });
+      } else if (actProgress >= 0.75 && actProgress < 0.90) {
+        // Act V: Dashboard Widget
+        const wX = 0;
+        const wY = 0;
+        const wW = 260;
+        const wH = 150;
+
+        ctx.strokeStyle = activeColors.lineStrong;
+        ctx.lineWidth = 1;
+        ctx.fillStyle = activeColors.nodeIdle;
+
+        // Draw widget box
+        ctx.beginPath();
+        ctx.rect(wX - wW / 2, wY - wH / 2, wW, wH);
+        ctx.fill();
+        ctx.stroke();
+
+        // Widget titles
+        ctx.font = '9px var(--font-sans)';
+        ctx.fillStyle = activeColors.textPrimary;
+        ctx.textAlign = 'left';
+        ctx.fillText('DIAGNOSTIC PIPELINE ACTIVE', wX - wW / 2 + 15, wY - wH / 2 + 20);
+
+        ctx.font = '24px var(--font-sans)';
+        ctx.fillText('94.8%', wX - wW / 2 + 15, wY - wH / 2 + 52);
+
+        // Draw line chart inside widget
+        ctx.beginPath();
+        ctx.strokeStyle = activeColors.lineStrong;
+        ctx.lineWidth = 1.5;
+        for (let j = 0; j < 140; j += 10) {
+          const cx = wX - wW / 2 + 105 + j;
+          const cy = wY + 20 + Math.sin(j * 0.15 - time * 2) * 12;
+          if (j === 0) ctx.moveTo(cx, cy);
+          else ctx.lineTo(cx, cy);
+        }
+        ctx.stroke();
+
+        // Pulsating dot on chart
+        const dotX = wX - wW / 2 + 235;
+        const dotY = wY + 20 + Math.sin(130 * 0.15 - time * 2) * 12;
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+        ctx.fillStyle = activeColors.textBright;
+        ctx.fill();
+
+        // Particles flow like active metrics inside the chart
+        particles.forEach((p, i) => {
+          const progressLocal = ((i * 0.05 + time * 0.25) % 1.0);
+          const tx = wX - wW / 2 + 105 + progressLocal * 130;
+          const ty = wY + 20 + Math.sin((progressLocal * 130) * 0.15 - time * 2) * 12;
+
+          p.x += (tx - p.x) * ease;
+          p.y += (ty - p.y) * ease;
+          p.opacity += (0.8 - p.opacity) * ease;
+          p.r = 1.8;
+          p.color = activeColors.textBright;
+        });
+      } else {
+        // Act VI: Fades out completely to CTA
+        particles.forEach((p) => {
+          p.opacity += (0 - p.opacity) * ease;
+        });
+      }
+
+      // Draw all active particles
+      particles.forEach((p) => {
+        if (p.opacity > 0.01) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color || activeColors.textSecondary;
+          ctx.globalAlpha = p.opacity;
+          ctx.fill();
+        }
+      });
+
+      ctx.restore();
+      ctx.globalAlpha = 1.0;
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    tick();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang, reducedMotion]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: -1,
+        pointerEvents: 'none',
+        display: 'block',
+      }}
+    />
+  );
+}

@@ -326,20 +326,26 @@ export function FilmCanvas({ progress }: FilmCanvasProps) {
           const row = i % 8;
           const col = Math.floor(i / 8) % 8;
           if (row < 7) {
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(nodes[i + 1].x, nodes[i + 1].y);
-            ctx.strokeStyle = activeColors.lineStrong;
-            ctx.globalAlpha = 0.25;
-            ctx.stroke();
+            const nextIdx = i + 1;
+            if (nextIdx < NODE_COUNT && nodes[nextIdx]) {
+              ctx.beginPath();
+              ctx.moveTo(node.x, node.y);
+              ctx.lineTo(nodes[nextIdx].x, nodes[nextIdx].y);
+              ctx.strokeStyle = activeColors.lineStrong;
+              ctx.globalAlpha = 0.25;
+              ctx.stroke();
+            }
           }
           if (col < 7) {
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(nodes[i + 8].x, nodes[i + 8].y);
-            ctx.strokeStyle = activeColors.lineStrong;
-            ctx.globalAlpha = 0.25;
-            ctx.stroke();
+            const nextIdx = i + 8;
+            if (nextIdx < NODE_COUNT && nodes[nextIdx]) {
+              ctx.beginPath();
+              ctx.moveTo(node.x, node.y);
+              ctx.lineTo(nodes[nextIdx].x, nodes[nextIdx].y);
+              ctx.strokeStyle = activeColors.lineStrong;
+              ctx.globalAlpha = 0.25;
+              ctx.stroke();
+            }
           }
 
           // Subtle ticks along lines representing code materialization
@@ -359,20 +365,26 @@ export function FilmCanvas({ progress }: FilmCanvasProps) {
           const row = i % 8;
           const col = Math.floor(i / 8) % 8;
           if (row < 7) {
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(nodes[i + 1].x, nodes[i + 1].y);
-            ctx.strokeStyle = activeColors.line;
-            ctx.globalAlpha = 0.2;
-            ctx.stroke();
+            const nextIdx = i + 1;
+            if (nextIdx < NODE_COUNT && nodes[nextIdx]) {
+              ctx.beginPath();
+              ctx.moveTo(node.x, node.y);
+              ctx.lineTo(nodes[nextIdx].x, nodes[nextIdx].y);
+              ctx.strokeStyle = activeColors.line;
+              ctx.globalAlpha = 0.2;
+              ctx.stroke();
+            }
           }
           if (col < 7) {
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(nodes[i + 8].x, nodes[i + 8].y);
-            ctx.strokeStyle = activeColors.line;
-            ctx.globalAlpha = 0.2;
-            ctx.stroke();
+            const nextIdx = i + 8;
+            if (nextIdx < NODE_COUNT && nodes[nextIdx]) {
+              ctx.beginPath();
+              ctx.moveTo(node.x, node.y);
+              ctx.lineTo(nodes[nextIdx].x, nodes[nextIdx].y);
+              ctx.strokeStyle = activeColors.line;
+              ctx.globalAlpha = 0.2;
+              ctx.stroke();
+            }
           }
 
           // Pulse flow along vertical lines
@@ -397,20 +409,26 @@ export function FilmCanvas({ progress }: FilmCanvasProps) {
           const row = i % 8;
           const col = Math.floor(i / 8) % 8;
           if (row < 7) {
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(nodes[i + 1].x, nodes[i + 1].y);
-            ctx.strokeStyle = activeColors.lineWeak;
-            ctx.globalAlpha = 0.15;
-            ctx.stroke();
+            const nextIdx = i + 1;
+            if (nextIdx < NODE_COUNT && nodes[nextIdx]) {
+              ctx.beginPath();
+              ctx.moveTo(node.x, node.y);
+              ctx.lineTo(nodes[nextIdx].x, nodes[nextIdx].y);
+              ctx.strokeStyle = activeColors.lineWeak;
+              ctx.globalAlpha = 0.15;
+              ctx.stroke();
+            }
           }
           if (col < 7) {
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(nodes[i + 8].x, nodes[i + 8].y);
-            ctx.strokeStyle = activeColors.lineWeak;
-            ctx.globalAlpha = 0.15;
-            ctx.stroke();
+            const nextIdx = i + 8;
+            if (nextIdx < NODE_COUNT && nodes[nextIdx]) {
+              ctx.beginPath();
+              ctx.moveTo(node.x, node.y);
+              ctx.lineTo(nodes[nextIdx].x, nodes[nextIdx].y);
+              ctx.strokeStyle = activeColors.lineWeak;
+              ctx.globalAlpha = 0.15;
+              ctx.stroke();
+            }
           }
         } else if (actProgress >= 0.96) {
           // Act X (Invitation): Fade back to central organic breathing cloud

@@ -39,7 +39,7 @@ export function Controls({ progress }: ControlsProps) {
   const { theme, setTheme } = useTheme();
   const c = useThemeColors();
 
-  const isVisible = progress >= 0.96;
+  const isVisible = progress >= 0.90;
 
   const btnStyle = (active: boolean): React.CSSProperties => ({
     background: 'none',
