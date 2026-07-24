@@ -231,9 +231,9 @@ export function TranslationCanvas({ progress, isCtaHovered = false }: Translatio
           p.opacity += (0.08 - p.opacity) * ease;
         });
       } else if (actProgress >= 0.15 && actProgress < 0.35) {
-        // Act II: Messy customer quotes float and accumulate sequentially
-        const showQuote1 = actProgress >= 0.15 && actProgress < 0.35;
-        const showQuote2 = actProgress >= 0.23 && actProgress < 0.35;
+        // Act II: Messy customer quotes emerge AFTER narrative phrase
+        const showQuote1 = actProgress >= 0.22 && actProgress < 0.35;
+        const showQuote2 = actProgress >= 0.29 && actProgress < 0.35;
 
         ctx.font = '400 19px "Inter", sans-serif';
         ctx.fillStyle = activeColors.textSecondary;
